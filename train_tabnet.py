@@ -2,7 +2,6 @@ import os, pickle, joblib
 import numpy as np
 
 from sklearn.metrics import classification_report
-
 from s2and_ext.my_featurization import get_matrices, featurizing_function
 
 

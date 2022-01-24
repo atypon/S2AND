@@ -1,9 +1,7 @@
 import os, pickle, joblib
-import numpy as np, lightgbm as lgb
+import lightgbm as lgb
 
 from sklearn.metrics import classification_report
-
-from s2and_ext.my_utils import load_dataset, NumpyDataset, plot_loss
 from s2and_ext.my_featurization import get_matrices, featurizing_function
 
 

@@ -1,13 +1,5 @@
 import os, pickle
-import numpy as np
 
-from joblib import dump, load
-
-from sklearn.metrics import classification_report
-from sklearn.linear_model import LogisticRegression
-from torch.utils.data import DataLoader
-
-from s2and_ext.my_utils import load_dataset, NumpyDataset, plot_loss
 from s2and_ext.my_featurization import get_matrices, featurizing_function
 from s2and_ext.my_models import EnsembleModel
 
