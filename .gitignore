@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+extended_data/*
+!extended_data/.gitkeep
+
 # C extensions
 *.so
 
