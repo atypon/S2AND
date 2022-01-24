@@ -6,6 +6,10 @@ __pycache__/
 extended_data/*
 !extended_data/.gitkeep
 
+data/*
+!data/path_config.json
+!data/s2and_name_tuples.txt
+
 # C extensions
 *.so
 
