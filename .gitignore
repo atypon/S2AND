@@ -10,6 +10,12 @@ data/*
 !data/path_config.json
 !data/s2and_name_tuples.txt
 
+cached/*
+!cached/.gitkeep
+
+pickled_datasets/*
+!pickled_datasets/.gitkeep
+
 # C extensions
 *.so
 
