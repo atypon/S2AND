@@ -16,6 +16,9 @@ cached/*
 pickled_datasets/*
 !pickled_datasets/.gitkeep
 
+models/*
+!models/.gitkeep
+
 # C extensions
 *.so
 
