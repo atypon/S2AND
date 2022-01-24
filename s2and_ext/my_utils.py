@@ -1,5 +1,4 @@
-import json, os, pickle, torch
-import numpy as np
+import json, os, pickle, torch, numpy as np
 import matplotlib.pyplot as plt
 
 from torch.utils.data import Dataset
@@ -8,7 +7,7 @@ from os.path import join
 from s2and.data import ANDData
 
 
-def load_dataset(dataset_name : str):
+def load_dataset(dataset_name : str) -> ANDData:
 
     parent_dir = f"data/{dataset_name}/"
     if not os.path.isfile(f'pickled_datasets/{dataset_name}.pickle'):
@@ -34,7 +33,12 @@ def load_dataset(dataset_name : str):
             print('Loaded dataset from pickle...')
     return dataset
 
-def load_signatures(dataset : str) -> dict:
+def load_signatures(dataset : str) -> Dict[str, dict]:
+
+    """
+    Load sigatures data and store them in dict
+    
+    """
 
     with open(f'extended_data/{dataset}/{dataset+"-signatures.json"}') as f:
         content = f.read().split('\n')
@@ -43,7 +47,13 @@ def load_signatures(dataset : str) -> dict:
 
     return {entry['signature_id'] : entry for entry in content}
 
-def get_block_dict(signatures : dict) -> dict:
+def get_block_dict(signatures : Dict[str, dict]) -> Dict[str, List[str]]:
+
+    """
+    Given dict of signatures, return the dict of blocks containing
+    block name : list of siagnatures in this block
+
+    """
 
     block_dict = {}
     for item in signatures.values():
@@ -53,56 +63,32 @@ def get_block_dict(signatures : dict) -> dict:
             block_dict[item['block']].append(item['signature_id'])
     return block_dict
 
-def custom_distance(sig1, sig2):
-    
-    score = 0
-    sum = 0 
-
-    if (sig1.get('magAuthorId', None) is not None) and (sig2.get('magAuthorId', None) is not None):
-        sum += 1
-        if sig1['magAuthorId'] == sig2['magAuthorId']:
-            score += 1
-    if (sig1.get('s2AuthorId', None) is not None) and (sig2.get('s2AuthorId', None) is not None):
-        sum += 1
-        if sig1['s2AuthorId'] == sig2['magAuthorId']:
-            score += 1
-    if (sig1.get('s2AuthorShorNormName', None) is not None) and (sig2.get('s2AuthorShorNormName', None) is not None):
-        sum += 0.5
-        if sig1['s2AuthorShorNormName'] == sig2['s2AuthorShorNormName']:
-            score += 0.5
-    if (sig1.get('s2AuthorNormName', None) is not None) and (sig2.get('s2AuthorNormName', None) is not None):
-        sum += 0.5
-        if sig1['s2AuthorNormName'] == sig2['s2AuthorNormName']:
-            score += 0.5
-    if (sig1.get('fosIdsLevel0', None) is not None) and (sig2.get('fosIdsLevel0', None) is not None):
-        sum += 0.5
-        if set(sig1['fosIdsLevel0']) ==  set(sig2['fosIdsLevel0']):
-            score += 0.5
-    if (sig1.get('fosIdsLevel1', None) is not None) and (sig2.get('fosIdsLevel1', None) is not None):
-        sum += 0.5
-        if set(sig1['fosIdsLevel1']) ==  set(sig2['fosIdsLevel1']):
-            score += 0.5
-    if (sig1.get('affiliationIds', None) is not None) and (sig2.get('affiliationIds', None) is not None):
-        sum += 0.5
-        if set(sig1['affiliationIds']) ==  set(sig2['affiliationIds']):
-            score += 0.5
-
-    return 1 - score/sum
 
 class NumpyDataset(Dataset):
 
-    def __init__(self, X, y):
+    """
+    Custom Pytorch Dataset class
+    """
+
+    def __init__(self, X : np.ndarray, y : np.ndarray) -> None:
         self.X = X
         self.y = y
     
-    def __len__(self):
+    def __len__(self) -> int:
         return self.y.shape[0]
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx : int) -> torch.Tensor :
         return torch.Tensor(self.X[idx,:]), self.y[idx]
 
-def plot_loss(train_loss, val_loss, path):
+def plot_loss(train_loss : List[float], 
+              val_loss : List[float],
+              path) -> None:
 
+    """
+    User for plotting the loss of NN model
+
+    """
+    
     plt.figure()
     plt.plot(range(1,len(train_loss)+1), train_loss)
     plt.plot(range(1,len(val_loss)+1), val_loss)
