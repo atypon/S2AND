@@ -1,36 +1,65 @@
-import numpy as np
+from typing import Callable, Dict, List, Tuple, Union
+import numpy as np, torch, pickle
 
 from Levenshtein import distance
-from scipy import spatial
 from s2and_ext.my_utils import load_dataset, load_signatures
 from torch.nn import functional as F
-import torch, pickle
 
 
-def extract_feature(sig1, sig2, attribute):
+def extract_feature(sig1 : Dict[str, dict], 
+                    sig2 : Dict[str, dict],
+                    attribute : str) -> Union[int, np.nan] :
+
+    """
+    Returns 1 if attribute is equal in sig1 and sig2 otherwise 0.
+    If attribute is missing, returns np.nan
+    """
+
     if (sig1.get(attribute, None) is not None) and (sig2.get(attribute, None) is not None):
         if sig1[attribute] == sig2[attribute]:
             return 1
         return 0
     return np.nan
 
-def cosine_sim(sig1, sig2):
+def cosine_sim(sig1 : Dict[str, dict], 
+               sig2 : Dict[str, dict]) -> Union[float, np.nan] :
+    
+    """
+    Computes cosine similarity of paperVector field of signature.
+    If field is missing, returns np.nan
+
+    """
     v1 = sig1.get('paperVector', None)
     v2 = sig2.get('paperVector', None)
     if (v1 is not None) and (v2 is not None):
-        #return np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
-        #return 1-spatial.distance.cosine(v1,v2)
         return F.cosine_similarity(torch.Tensor(v1), torch.Tensor(v2), dim=0).item()
     return np.nan
 
-def name_distance(sig1, sig2):
+def name_distance(sig1 : Dict[str, dict],
+                  sig2 : Dict[str, dict]) -> Union[float, np.nan] :
+
+    """
+    Computes levenshtein distance of s2AuthorName attribute.
+    If attribute is missing, return np.nan
+
+    """
+
     v1 = sig1.get('s2AuthorName', None)
     v2 = sig2.get('s2AuthorName', None)
     if (v1 is not None) and (v2 is not None):
         return distance(v1,v2)
     return np.nan
 
-def jaccard(sig1, sig2, attribute):
+def jaccard(sig1 : Dict[str, dict], 
+            sig2 : Dict[str, dict],
+            attribute : str) -> Union[float, np.nan]:
+
+    """
+    Computes jaccard similarity of list attribute between two signatures.
+    If attribute is missing, returns np.nan
+
+    """
+
     v1 = sig1.get(attribute, None)
     v2 = sig2.get(attribute, None)
     if (v1 is not None) and (v2 is not None):
@@ -41,7 +70,13 @@ def jaccard(sig1, sig2, attribute):
         return 0
     return np.nan
 
-def featurizing_function(sig1, sig2):
+def featurizing_function(sig1 : Dict[str, dict],
+                         sig2 : Dict[str, dict]) -> List[Union[float, np.nan]]:
+
+    """
+    Calculates the feature vector of two given signature dicts
+
+    """
 
     features = []
     features.append(cosine_sim(sig1, sig2))
@@ -65,7 +100,17 @@ class Featurizer():
 
     '''
 
-    def __init__(self, dataset_name, featurizing_function, parse_specter=False):
+    def __init__(self, 
+                 dataset_name : str, 
+                 featurizing_function : Callable, 
+                 parse_specter : bool = False) -> None :
+        """
+        Initializes Featurizer object, loading datasets and signatures.
+        If parse_specter = true, it parses the provided specter embeddings
+        for them to be used in the featurization process.
+
+        """
+
         self.parse_specter = parse_specter
         self.dataset = load_dataset(dataset_name)
         self.extended_signatures = load_signatures(dataset_name)
@@ -79,7 +124,7 @@ class Featurizer():
             for vector, paper_id in zip(vectors, ids):
                 self.paper_ids_to_specter[paper_id] = vector.tolist()
 
-    def featurize_pairs(self, pairs):
+    def featurize_pairs(self, pairs : Tuple[Dict[str, dict]]) -> Tuple[np.ndarray]:
         
         '''
         Given the list of pairs return the matrix of features
@@ -102,7 +147,7 @@ class Featurizer():
 
         return np.asarray(X), np.asarray(y)
 
-    def get_feature_matrix(self, split):
+    def get_feature_matrix(self, split : str) -> Tuple[np.ndarray]:
 
         '''
         Get dataset's featurized pairs matrix by specifying the desired split
@@ -118,7 +163,9 @@ class Featurizer():
         elif split == 'test':
             return self.featurize_pairs(test_pairs)
 
-def get_matrices(datasets, featurizing_function, remove_nan=True):
+def get_matrices(datasets : List[str], 
+                 featurizing_function : Callable, 
+                 remove_nan : bool =True) -> Tuple[np.ndarray]:
 
     '''
     Featurize multiple datasets and return the combined matrix
