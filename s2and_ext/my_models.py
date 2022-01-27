@@ -1,14 +1,11 @@
 import json, torch, copy
-import joblib
-from sklearn import cluster
 import lightgbm as lgb
 
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 
-from typing import Callable
-from numpy import ndarray
+from typing import Callable, Dict, List, Tuple, Union
 from tqdm import tqdm
 from joblib import dump, load
 
@@ -24,7 +21,20 @@ from pytorch_tabnet.tab_model import TabNetClassifier
 
 class MLP(nn.Module):
 
-    def __init__(self, hidden_layers, n_features, n_classes=1):
+    """
+    Implements simple multilayer perceptron
+
+    """
+
+    def __init__(self,
+                 hidden_layers : List[int],
+                 n_features : List[int],
+                 n_classes : int =1) -> None :
+        
+        """
+        Constructs the MLP
+
+        """
 
         super(MLP, self).__init__()
         self.n_classes = n_classes
@@ -39,14 +49,35 @@ class MLP(nn.Module):
                 layers.append(nn.ReLU())
         self.model = nn.Sequential(*layers)
 
-    def forward(self, X):
+    def forward(self, X : torch.Tensor) -> torch.Tensor :
+        
+        """
+        Model's forward pass
+        """
+
         return self.model(X).squeeze(dim=-1)
 
-    def predict(self, X):
+    def predict(self, X : np.ndarray) -> np.ndarray:
+
+        """
+        Predict method accepts and returns numpy array and also applies
+        activation function to output layer
+
+        """
+
         # Used for compatibility issues with sklearn
         return torch.sigmoid(self.forward(torch.Tensor(X))).detach().numpy()
 
-    def fit(self, train_loader, val_loader, epochs=50, lr=1e-03):
+    def fit(self, 
+            train_loader : DataLoader, 
+            val_loader : DataLoader, 
+            epochs : int = 50,
+            lr : float =1e-03) -> Tuple[List[float]]:
+
+        """
+        Trains the model
+
+        """
 
         criterion = nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(self.model.parameters(), lr=lr)
@@ -77,16 +108,42 @@ class MLP(nn.Module):
 
 class EnsembleModel():
 
-    def __init__(self, hidden_layers, n_features, n_classes,
-                 shallow_nn_features:list, ensemble_features:list):
+    """
+    Implements model stacking of MLP + logistic regression of features 
+    regarding equality of ids that can be considered an another model
+
+    """
+
+    def __init__(self, 
+                 hidden_layers : List[int], 
+                 n_features : List[int],
+                 n_classes : int,
+                 shallow_nn_features : List[int],
+                 ensemble_features : List[int]) -> None:
         
+        """
+        Initializes ensemble model
+
+        """
+
         self.shallow_nn = MLP(hidden_layers, n_features, n_classes)
         self.ensemble_layer = LogisticRegression(random_state=0)
 
         self.shallow_nn_features = shallow_nn_features
         self.ensemble_features = ensemble_features
 
-    def fit(self, X_train, y_train, X_val, y_val, epochs=30, lr=1e-03):
+    def fit(self, 
+            X_train : np.ndarray, 
+            y_train : np.ndarray,
+            X_val : np.ndarray, 
+            y_val : np.ndarray, 
+            epochs : int = 30,
+            lr : float = 1e-03) -> None:
+
+        """
+        Fits both the MLP and then the logistic regression layer
+
+        """
 
         X_train_mlp = X_train[:,self.shallow_nn_features]
         X_val_mlp = X_val[:,self.shallow_nn_features]
@@ -96,7 +153,7 @@ class EnsembleModel():
 
         # Train shallow NN
 
-        train_loss, val_loss = self.shallow_nn.fit(train_loader, val_loader, epochs=30, lr=1e-03)
+        train_loss, val_loss = self.shallow_nn.fit(train_loader, val_loader, epochs=epochs, lr=lr)
         plot_loss(train_loss, val_loss, 'results/NNlosses')
         print(classification_report(y_val, np.rint(self.shallow_nn.predict(X_val_mlp))))
         torch.save(self.shallow_nn, 'models/shallowNN.pt')
@@ -112,7 +169,13 @@ class EnsembleModel():
         dump(self.ensemble_layer, f'models/ensemble.joblib')
         dump(self, f'models/combined.joblib')
 
-    def predict_distance(self, X):
+    def predict_distance(self, 
+                         X : Union[np.ndarray, List[List[float]]]) -> np.ndarray :
+
+        """
+        Predicts distance (probability(0))
+        
+        """
 
         if isinstance(X, list):
             X = np.asarray(X)
@@ -124,11 +187,26 @@ class EnsembleModel():
 
 class LightGBMWrapper():
 
-    def __init__(self, model):
+    """
+    Wrapper for LGBMClassifier that implements predict_distance method
+
+    """
+
+    def __init__(self, model : lgb.LGBMClassifier) -> None:
+        
+        """
+        Initilizes wrapper
+
+        """
 
         self.model = model
 
-    def predict_distance(self, X):
+    def predict_distance(self, X : Union[np.ndarray, List[List[float]]]) -> np.ndarray:
+
+        """
+        Predicts distance (probability(0))
+
+        """
 
         if isinstance(X,list):
             X = np.asarray(X)
@@ -137,10 +215,25 @@ class LightGBMWrapper():
 
 class TabNetWrapper():
 
-    def __init__(self, model):
+    """
+    Wrapper for TabNet that implements predict_distance method
+
+    """
+
+    def __init__(self, model : TabNetClassifier) -> None:
+
+        """
+        Initilize wrapper
+        """
+
         self.model = model
 
-    def predict_distance(self, X):
+    def predict_distance(self, X : Union[np.ndarray, List[List[float]]]) -> np.ndarray:
+
+        """
+        Predicts distance (probability(0))
+
+        """
 
         if isinstance(X, list):
             X = np.asarray(X)
@@ -154,9 +247,16 @@ class Clusterer():
     to predict method. 
     """
 
-    def __init__(self, combined_classifier : str,
-                 dataset_name : str, featurization_fun : Callable, clusterer='dbscan') -> None:
+    def __init__(self, 
+                 combined_classifier : str,
+                 dataset_name : str, 
+                 featurization_fun : Callable, 
+                 clusterer : str = 'dbscan') -> None:
 
+        """
+        Initilizes clusterer object
+
+        """
         self.signatures = load_signatures(dataset_name)
         self.featurization_fun = featurization_fun
         self.model = load(combined_classifier)
@@ -168,7 +268,15 @@ class Clusterer():
             self.clusterer = AgglomerativeClustering(n_clusters=None, affinity='precomputed',
                              distance_threshold=0.4, linkage='average')
 
-    def get_distance_matrix(self, block : list, signatures : dict) -> ndarray:
+    def get_distance_matrix(self, 
+                            block : List[str], 
+                            signatures : Dict[str, Dict[str, Union[list, float, str]]]) -> np.ndarray:
+
+        """
+        Given a list of signatures (block) and the signatures metadata in 
+        signatures dict, calculates the block distance matrix
+
+        """
 
         n_signatures = len(block)
         d_matrix = np.zeros((n_signatures, n_signatures))
@@ -206,7 +314,13 @@ class Clusterer():
 
         return d_matrix + np.transpose(d_matrix)
 
-    def get_dmatrix_dict(self, block_dict):
+    def get_dmatrix_dict(self, block_dict : Dict[str, List[str]]) -> Dict[str, np.ndarray]:
+
+        """
+        Given dictionary of blocks (block_name : block) returns dict of distance matrices
+        {block_name : distance_matrix}
+
+        """
 
         block_to_dmatrix = {}
         for block_name in tqdm(block_dict):
@@ -215,7 +329,14 @@ class Clusterer():
             block_to_dmatrix[block_name] = dmatrix
         return block_to_dmatrix
 
-    def predict(self, block_dict, block_to_dmatrix=None):
+    def predict(self, 
+                block_dict : Dict[str, List[str]], 
+                block_to_dmatrix : Union[None, Dict[str, np.ndarray]] = None) -> Dict[str,str]:
+
+        """
+        Runs clustering on distance matrices and produces final prediction
+
+        """
 
         sign_to_pred_clusters = {}
         for block_name in block_dict:
@@ -242,16 +363,30 @@ class Clusterer():
 
 class DummyClusterer():
 
-    def __init__(self, source) -> None:
-        
+    """
+    Used for compatibility reasons for S2AND's cluster_eval function
+
+    """
+
+    def __init__(self, source : Union[str, Dict[str, str]]) -> None:
+            
         if isinstance(source, str):
             with open(source) as f:
                 self.sign_to_pred_cluster = json.load(f)
         else:
             self.sign_to_pred_cluster = source
             
-    def predict(self, block_dict, dataset, use_s2_clusters) -> dict:
+    def predict(self, 
+                block_dict : Dict[str, List[str]], 
+                dataset, 
+                use_s2_clusters) -> Dict[str, List[str]]:
         
+        """
+        Given the block dict, returns the predicted clusters dict
+        cluster_id : signatures llist
+        
+        """
+
         # dataset and use_s2_clusters are placed only for compatibility reasons
         
         pred_clusters = {}
