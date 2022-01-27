@@ -184,7 +184,6 @@ class EnsembleModel():
         ens_features = np.concatenate((X[:,self.ensemble_features], np.expand_dims(distance, axis=1)), axis=1)
         return self.ensemble_layer.predict_proba(ens_features)[:,0]
 
-
 class LightGBMWrapper():
 
     """
@@ -211,7 +210,6 @@ class LightGBMWrapper():
         if isinstance(X,list):
             X = np.asarray(X)
         return self.model.predict_proba(X)[:,0]
-
 
 class TabNetWrapper():
 
@@ -267,7 +265,8 @@ class Clusterer():
         elif clusterer == 'agglomerative':
             self.clusterer = AgglomerativeClustering(n_clusters=None, affinity='precomputed',
                              distance_threshold=0.4, linkage='average')
-
+    
+    @torch.inference_mode()
     def get_distance_matrix(self, 
                             block : List[str], 
                             signatures : Dict[str, Dict[str, Union[list, float, str]]]) -> np.ndarray:
@@ -286,24 +285,23 @@ class Clusterer():
         # Maps feature list potition to location in d_matrix
         # Used for placing results in correct dmatrix position
         mapper = {}
-        with torch.inference_mode():
-            for i in range(0, n_signatures):
-                for j in range(0, n_signatures):
-                    if i > j:
-                        continue
-                    # This is the same signature
-                    if i == j:
-                        d_matrix[i,j] = 0
-                    # This is non the same signature
+        for i in range(0, n_signatures):
+            for j in range(0, n_signatures):
+                if i > j:
+                    continue
+                # This is the same signature
+                if i == j:
+                    d_matrix[i,j] = 0
+                # This is non the same signature
+                else:
+                    if block[i] in signatures and block[j] in signatures:
+                        sig1 = signatures[block[i]]
+                        sig2 = signatures[block[j]]
+                        features.append(self.featurization_fun(sig1, sig2))
+                        mapper[feature_idx] = (i,j)
+                        feature_idx += 1
                     else:
-                        if block[i] in signatures and block[j] in signatures:
-                            sig1 = signatures[block[i]]
-                            sig2 = signatures[block[j]]
-                            features.append(self.featurization_fun(sig1, sig2))
-                            mapper[feature_idx] = (i,j)
-                            feature_idx += 1
-                        else:
-                            d_matrix[i,j] = 1
+                        d_matrix[i,j] = 1
         
         # Having featurized every sign combination, we calculate
         # distances in a batch-way to save time
