@@ -8,7 +8,7 @@ from torch.nn import functional as F
 
 def extract_feature(sig1 : Dict[str, dict], 
                     sig2 : Dict[str, dict],
-                    attribute : str) -> Union[int, np.nan] :
+                    attribute : str) -> float :
 
     """
     Returns 1 if attribute is equal in sig1 and sig2 otherwise 0.
@@ -22,7 +22,7 @@ def extract_feature(sig1 : Dict[str, dict],
     return np.nan
 
 def cosine_sim(sig1 : Dict[str, dict], 
-               sig2 : Dict[str, dict]) -> Union[float, np.nan] :
+               sig2 : Dict[str, dict]) -> float :
     
     """
     Computes cosine similarity of paperVector field of signature.
@@ -36,7 +36,7 @@ def cosine_sim(sig1 : Dict[str, dict],
     return np.nan
 
 def name_distance(sig1 : Dict[str, dict],
-                  sig2 : Dict[str, dict]) -> Union[float, np.nan] :
+                  sig2 : Dict[str, dict]) -> float :
 
     """
     Computes levenshtein distance of s2AuthorName attribute.
@@ -52,7 +52,7 @@ def name_distance(sig1 : Dict[str, dict],
 
 def jaccard(sig1 : Dict[str, dict], 
             sig2 : Dict[str, dict],
-            attribute : str) -> Union[float, np.nan]:
+            attribute : str) -> float :
 
     """
     Computes jaccard similarity of list attribute between two signatures.
@@ -71,7 +71,7 @@ def jaccard(sig1 : Dict[str, dict],
     return np.nan
 
 def featurizing_function(sig1 : Dict[str, dict],
-                         sig2 : Dict[str, dict]) -> List[Union[float, np.nan]]:
+                         sig2 : Dict[str, dict]) -> float:
 
     """
     Calculates the feature vector of two given signature dicts
