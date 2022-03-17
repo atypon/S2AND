@@ -10,8 +10,8 @@ data/*
 !data/path_config.json
 !data/s2and_name_tuples.txt
 
-cached/*
-!cached/.gitkeep
+clustering_results/*
+!clustering_results/.gitkeep
 
 pickled_datasets/*
 !pickled_datasets/.gitkeep

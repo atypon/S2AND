@@ -1,24 +1,15 @@
-import os, json, pickle
-from re import search
-import numpy as np
+import os, json, numpy as np
 
 from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
 
-from typing import List
-from tqdm import tqdm
-from sklearn.cluster import DBSCAN
-from joblib import dump, load
-from os.path import join
-
-from s2and.data import ANDData
 from s2and.eval import cluster_eval
 from s2and_ext.my_utils import load_dataset
 from s2and_ext.my_models import DummyClusterer, Clusterer
 from s2and_ext.my_featurization import featurizing_function
 
-#datasets_names = ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
-datasets_names = ['zbmath']
+datasets_names = ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
+#datasets_names = ['pubmed']
 
 datasets = [load_dataset(dataset_name) for dataset_name in datasets_names]
 
@@ -26,9 +17,9 @@ datasets = [load_dataset(dataset_name) for dataset_name in datasets_names]
 
 if __name__ == "__main__":
 
-    clusterers = [Clusterer(combined_classifier='models/tabnet.joblib',
+    clusterers = [Clusterer(combined_classifier='models/lightgbm.joblib',
                             dataset_name=dataset_name,
-                            featurization_fun=featurizing_function,
+                            featurization_function=featurizing_function,
                             clusterer='dbscan') for dataset_name in datasets_names]
 
     val_block_dicts = []

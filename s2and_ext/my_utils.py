@@ -34,12 +34,9 @@ def load_dataset(dataset_name : str) -> ANDData:
     return dataset
 
 def load_signatures(dataset : str) -> Dict[str, dict]:
-
     """
     Load sigatures data and store them in dict
-    
     """
-
     with open(f'extended_data/{dataset}/{dataset+"-signatures.json"}') as f:
         content = f.read().split('\n')
         content.remove('')
@@ -48,13 +45,10 @@ def load_signatures(dataset : str) -> Dict[str, dict]:
     return {entry['signature_id'] : entry for entry in content}
 
 def get_block_dict(signatures : Dict[str, dict]) -> Dict[str, List[str]]:
-
     """
     Given dict of signatures, return the dict of blocks containing
     block name : list of siagnatures in this block
-
     """
-
     block_dict = {}
     for item in signatures.values():
         if item['block'] not in block_dict:
@@ -65,7 +59,6 @@ def get_block_dict(signatures : Dict[str, dict]) -> Dict[str, List[str]]:
 
 
 class NumpyDataset(Dataset):
-
     """
     Custom Pytorch Dataset class
     """
@@ -83,12 +76,9 @@ class NumpyDataset(Dataset):
 def plot_loss(train_loss : List[float], 
               val_loss : List[float],
               path) -> None:
-
     """
     User for plotting the loss of NN model
-
     """
-    
     plt.figure()
     plt.plot(range(1,len(train_loss)+1), train_loss)
     plt.plot(range(1,len(val_loss)+1), val_loss)
