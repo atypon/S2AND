@@ -142,7 +142,7 @@ def get_matrices(datasets : List[str],
                  featurizing_function : Callable, 
                  remove_nan : bool =True,
                  default_embeddings: bool = True,
-                 embeddings_path: Union[str, None] = None) -> Tuple[np.ndarray]:
+                 external_emb_dir: str = None) -> Tuple[np.ndarray]:
     '''
     Featurize multiple datasets and return the combined matrix
     If no featurizing_function is given, the default will be used
@@ -153,6 +153,7 @@ def get_matrices(datasets : List[str],
 
     for dataset_name in datasets:
 
+        embeddings_path = f'{external_emb_dir}/{dataset_name}/{dataset_name}_embeddings.json'
         featurizer = Featurizer(dataset_name=dataset_name, 
                                 featurizing_function=featurizing_function,
                                 default_embeddings=default_embeddings,

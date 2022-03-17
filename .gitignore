@@ -22,6 +22,9 @@ models/*
 results/*
 !results/.gitkeep
 
+external_embeddings/*
+!external_embeddings/.gitkeep
+
 # C extensions
 *.so
 

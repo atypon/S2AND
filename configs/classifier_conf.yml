@@ -1,0 +1,4 @@
+datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
+default_embeddings: True
+external_embeddings_dir: 'external_embeddings/random_embedder'
+model_path: 'models/lightgbm.joblib'

@@ -1,5 +1,6 @@
-import os, json, numpy as np
+import json, yaml, argparse, numpy as np
 
+from os.path import join
 from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
 
@@ -8,18 +9,25 @@ from s2and_ext.my_utils import load_dataset
 from s2and_ext.my_models import DummyClusterer, Clusterer
 from s2and_ext.my_featurization import featurizing_function
 
-datasets_names = ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
-#datasets_names = ['pubmed']
-
-datasets = [load_dataset(dataset_name) for dataset_name in datasets_names]
-
-# Load ANDData
-
 if __name__ == "__main__":
 
-    clusterers = [Clusterer(combined_classifier='models/lightgbm.joblib',
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--conf',
+        default='configs/clusterer_conf.yml',
+        help='Path to configuration file'
+    )
+    args = parser.parse_args()
+    with open(args.conf) as f:
+        conf = yaml.safe_load(f)
+
+    datasets_names = conf['datasets']
+    datasets = [load_dataset(dataset_name) for dataset_name in datasets_names]
+    clusterers = [Clusterer(combined_classifier=conf['model_source'],
                             dataset_name=dataset_name,
                             featurization_function=featurizing_function,
+                            default_embeddings=conf['default_embeddings'],
+                            embeddings_path=join(conf['external_embeddings_dir'], dataset_name, f'{dataset_name}_embeddings.json'),
                             clusterer='dbscan') for dataset_name in datasets_names]
 
     val_block_dicts = []
