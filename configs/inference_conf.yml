@@ -1,0 +1,9 @@
+data_dir: 'data/'
+extended_data_dir: 'extended_data/'
+embeddings_dir: 'external_embeddings/'
+model:
+  name: 'specter'
+  path: '../model.onnx'
+tokenizer:
+  pretrained_model: 'sentence-transformers/all-mpnet-base-v2'
+  max_length: 512
