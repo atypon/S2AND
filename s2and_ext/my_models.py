@@ -144,24 +144,6 @@ class LightGBMWrapper():
             X = np.asarray(X)
         return self.model.predict_proba(X)[:,0]
 
-class TabNetWrapper():
-    """
-    Wrapper for tabnet model, implementing predict_distance method
-    necessary for Clusterer objects to work
-    """
-
-    def __init__(self, model):
-        self.model = model
-
-    def predict_distance(self, X):
-        """
-        Predicts probability of featurized pair to originate from different entity
-        """
-        if isinstance(X, list):
-            X = np.asarray(X)
-        np.nan_to_num(X, copy=False)
-        return self.model.predict_proba(X)[:,0]
-
 class Clusterer():
     """
     Responsible for clustering the block_dict given as input
