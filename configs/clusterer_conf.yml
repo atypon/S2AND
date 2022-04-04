@@ -1,4 +1,9 @@
+mlflow:
+  tracking_uri: 'file:mlruns' # Can be remote server as well eg https://my-tracking-server:5000
+  experiment_name: 'AND-clustering'
+  run_name: 'doc2vec'
 datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 model_source: 'models/lightgbm.joblib'
 default_embeddings: True
-external_embeddings_dir: 'external_embeddings/random_embedder'
+#external_embeddings_dir: 'external_embeddings/random_embedder'
+external_embeddings_dir: None

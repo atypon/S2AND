@@ -25,6 +25,8 @@ results/*
 external_embeddings/*
 !external_embeddings/.gitkeep
 
+mlruns/
+
 # C extensions
 *.so
 

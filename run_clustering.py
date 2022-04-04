@@ -1,8 +1,9 @@
-import json, yaml, argparse, numpy as np
+import json, yaml, argparse, mlflow, numpy as np
 
 from os.path import join
 from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
+from mlflow.tracking import MlflowClient
 
 from s2and.eval import cluster_eval
 from s2and_ext.my_utils import load_dataset
@@ -76,17 +77,41 @@ if __name__ == "__main__":
     )
     print(f'Best parameters found after optimization : {best}')
 
-    for test_block_dict, test_block_to_dmatrix, clusterer, dataset_name, dataset in zip(test_block_dicts, test_dmatrices, clusterers, datasets_names, datasets):
-        
-        print(dataset_name)
-        clusterer.clusterer.set_params(**best)
-        sign_to_pred_clusters = clusterer.predict(test_block_dict, test_block_to_dmatrix)
-        
-        with open(f'clustering_results/{dataset_name}.json', 'w') as f:
-            json.dump(sign_to_pred_clusters, f)
+    """
+    Now after having found the optimal hyperparameters for DBSCAN
+    we continue using those and extracting final metrics for each dataset
+    """
 
-        # Performing evaluation after parsing results from file
-        dummy_clusterer = DummyClusterer(sign_to_pred_clusters)
-        metrics, metrics_per_signature = cluster_eval(dataset, dummy_clusterer, split='test')
-        print(metrics)
+    mlflow.set_tracking_uri(conf['mlflow']['tracking_uri'])
+    client = MlflowClient()
+    experiment = client.get_experiment_by_name(name=conf['mlflow']['experiment_name'])
+    if experiment is None:
+        experiment_id = client.create_experiment(name=conf['mlflow']['experiment_name'])
+    else:
+        if dict(experiment)['lifecycle_stage'] == 'deleted':
+            client.restore_experiment(dict(experiment)['experiment_id'])
+        experiment_id = dict(experiment)['experiment_id']
 
+    with mlflow.start_run(experiment_id=experiment_id, tags={'datasets': conf['datasets']}, run_name=conf['mlflow']['run_name']):
+        mlflow.log_params(best)
+        
+        for test_block_dict, test_block_to_dmatrix, clusterer, dataset_name, dataset in zip(test_block_dicts, test_dmatrices, clusterers, datasets_names, datasets):
+            
+            print(dataset_name)
+            clusterer.clusterer.set_params(**best)
+            sign_to_pred_clusters = clusterer.predict(test_block_dict, test_block_to_dmatrix)
+            
+            with open(f'clustering_results/{dataset_name}.json', 'w') as f:
+                json.dump(sign_to_pred_clusters, f)
+        
+            # Performing evaluation after parsing results from file
+            dummy_clusterer = DummyClusterer(sign_to_pred_clusters)
+            metrics, metrics_per_signature = cluster_eval(dataset, dummy_clusterer, split='test')
+            
+            mlflow_metrics = {
+                f'{dataset_name} B3 P' : metrics['B3 (P, R, F1)'][0],
+                f'{dataset_name} B3 R' : metrics['B3 (P, R, F1)'][1],
+                f'{dataset_name} B3 F1' : metrics['B3 (P, R, F1)'][2],
+            }
+            mlflow.log_metrics(mlflow_metrics)
+            print(metrics)
