@@ -22,6 +22,7 @@ jellyfish==0.8.2
 PyYAML==6.0
 python-Levenshtein==0.12.2
 mlflow==1.24.0
+transformers==4.11.3
 
 # For CI and testing
 pytest==6.0.2

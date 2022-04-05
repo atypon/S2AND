@@ -13,9 +13,10 @@ if __name__ == "__main__":
     with open(args.conf) as f:
         conf = yaml.safe_load(f)
 
-    model = ONNXModel(conf['model']['path'], 
-                      conf['tokenizer']['pretrained_model'],
-                      conf['tokenizer']['max_length'])
+    model = ONNXModel(path_to_onnx=conf['model']['path'], 
+                      tokenizer_pretrained_model=conf['tokenizer']['pretrained_model'],
+                      tokenizer_max_length=conf['tokenizer']['max_length'],
+                      inputs=conf['model']['inputs'])
 
     embed_s2and(model=model, 
                 model_name=conf['model']['name'],
