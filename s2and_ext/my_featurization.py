@@ -28,7 +28,11 @@ def cosine_sim(sig1 : Dict[str, dict],
     v1 = sig1.get('paperVector', None)
     v2 = sig2.get('paperVector', None)
     if (v1 is not None) and (v2 is not None):
-        return F.cosine_similarity(torch.Tensor(v1), torch.Tensor(v2), dim=0).item()
+        v1 = torch.Tensor(v1)
+        v2 = torch.Tensor(v2)
+        #v1[torch.abs(v2) < 0.13] = 0
+        #v2[torch.abs(v2) < 0.13] = 0
+        return F.cosine_similarity(v1, v2, dim=0).item()
     return np.nan
 
 def name_distance(sig1 : Dict[str, dict],
