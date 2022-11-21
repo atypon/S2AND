@@ -12,7 +12,7 @@ except NameError:
     PROJECT_ROOT_PATH = os.path.abspath(os.path.join(os.getcwd()))
 
 # load up the path_configs and check if they are set
-CONFIG_LOCATION = os.path.join(PROJECT_ROOT_PATH, "data", "path_config.json")
+CONFIG_LOCATION = os.path.join("data", "path_config.json")
 with open(CONFIG_LOCATION) as _json_file:
     CONFIG = json.load(_json_file)
 
