@@ -8,7 +8,7 @@ from utils.configs import load_configurations
 from utils.mlflow import get_or_create_experiment
 from sklearn.metrics import classification_report, f1_score
 from s2and_ext.my_featurization import get_matrices, featurizing_function
-from s2and_ext.my_models import LightGBMWrapper
+from s2and_ext.classification_models import LightGBMWrapper
 
 
 def run_lightgbm_experiment(

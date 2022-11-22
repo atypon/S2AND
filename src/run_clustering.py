@@ -2,8 +2,8 @@ import mlflow
 from os.path import join
 from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
-from s2and_ext.my_utils import load_dataset
-from s2and_ext.my_models import Clusterer
+from s2and_ext.utils import load_dataset
+from s2and_ext.clustering_models import Clusterer
 from s2and_ext.my_featurization import featurizing_function
 from s2and_ext.clustering_objective import Objective
 from utils.configs import load_configurations

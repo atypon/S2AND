@@ -2,7 +2,7 @@ import json, torch, numpy as np
 from typing import Callable, Dict, List, Tuple, Union
 
 from Levenshtein import distance
-from s2and_ext.my_utils import load_dataset, load_signatures
+from s2and_ext.utils import load_dataset, load_signatures
 from torch.nn import functional as F
 
 
