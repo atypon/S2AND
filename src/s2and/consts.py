@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("s2and")
 
 try:
-    PROJECT_ROOT_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir))
+    PROJECT_ROOT_PATH = os.path.abspath(os.path.join(__file__, os.pardir, os.pardir, os.pardir))
 except NameError:
     PROJECT_ROOT_PATH = os.path.abspath(os.path.join(os.getcwd()))
 
