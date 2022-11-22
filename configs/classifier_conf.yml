@@ -1,5 +1,5 @@
 mlflow:
-  tracking_uri: 'https://mlflow-demo.atypon.com/'
+  tracking_uri: 'mlruns' #'https://mlflow-demo.atypon.com/'
   experiment_name: 'Default'
   run_name: 'doc2vec_sparse_0_23'
 model:

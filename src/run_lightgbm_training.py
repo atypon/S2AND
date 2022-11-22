@@ -60,8 +60,8 @@ if __name__ == "__main__":
         run_lightgbm_experiment(
             X_train=X_train, 
             y_train=y_train, 
-            X_val=X_val, 
-            y_val=y_val, 
+            X_test=X_val, 
+            y_test=y_val, 
             results_folder=cfg.results.results_folder,
             model_path=cfg.results.model_path,
             model_hyperparams=cfg.model
