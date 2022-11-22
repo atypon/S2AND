@@ -7,12 +7,11 @@ The reference model is live on semanticscholar.org, and the trained model is ava
 To install this package, run the following:
 
 ```bash
-git clone https://github.com/allenai/S2AND.git
+git clone https://github.com/atypon/S2AND.git
 cd S2AND
 conda create -y --name s2and python==3.7
 conda activate s2and
 pip install -r requirements.in
-pip install -e .
 ```
 
 If you run into cryptic errors about GCC on macOS while installing the requirments, try this instead:
@@ -22,7 +21,6 @@ CFLAGS='-stdlib=libc++' pip install -r requirements.in
 
 ## Data 
 To obtain the S2AND dataset, run the following command after the package is installed (from inside the `S2AND` directory):  
-```[Expected download size is: 50.4 GiB]```
 
 `aws s3 sync --no-sign-request s3://ai2-s2-research-public/s2and-release data/`
 
@@ -48,3 +46,11 @@ Modify the config file at `data/path_config.json`. This file should look like th
 ```
 As the dummy file says, `main_data_dir` should be set to the location of wherever you downloaded the data to, and
 `internal_data_dir` can be ignored, as it is used for some scripts that rely on unreleased data, internal to Semantic Scholar.
+
+## Run
+
+There are three main run scripts to perform the disambiguation process.
+
+  * run_inference.py: Produces embeddings with the selected transformer model defined by an onnx file for all signatures in the data.
+  * run_lightgbm_training.py: Trains lightgbm classifier to calculate distance between signatures.
+  * run_clustering.py: Performs hyperparam optimization of the clusterer and clusters the signatures.
