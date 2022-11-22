@@ -1,11 +1,11 @@
 import json, torch
-
+import lightgbm as lgb
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from typing import Callable, Union
+from typing import Callable, Union, List, Dict
 from numpy import ndarray
 from tqdm import tqdm
 from joblib import dump, load
@@ -16,6 +16,7 @@ from sklearn.metrics import classification_report
 
 from s2and_ext.my_utils import load_signatures, plot_loss, NumpyDataset
 from s2and_ext.my_featurization import Featurizer
+from s2and.data import ANDData
 
 class MLP(nn.Module):
     """
@@ -132,11 +133,11 @@ class LightGBMWrapper():
     necessary for Clusterer objects to work
     """
 
-    def __init__(self, model):
-
+    def __init__(self, model: lgb.LGBMClassifier) -> None:
+        """Initalizes class"""
         self.model = model
 
-    def predict_distance(self, X):
+    def predict_distance(self, X: Union[np.ndarray, List[List[float]]]) -> np.ndarray:
         """
         Predicts probability of featurized pair to originate from different entity
         """
@@ -176,7 +177,7 @@ class Clusterer():
                              distance_threshold=0.4, linkage='average')
 
     @torch.inference_mode()
-    def get_distance_matrix(self, block : list, signatures : dict) -> ndarray:
+    def get_distance_matrix(self, block : List[str]) -> ndarray:
 
         n_signatures = len(block)
         d_matrix = np.zeros((n_signatures, n_signatures))
@@ -195,9 +196,9 @@ class Clusterer():
                     d_matrix[i,j] = 0
                 # This is non the same signature
                 else:
-                    if block[i] in signatures and block[j] in signatures:
-                        sig1 = signatures[block[i]]
-                        sig2 = signatures[block[j]]
+                    if block[i] in self.signatures and block[j] in self.signatures:
+                        sig1 = self.signatures[block[i]]
+                        sig2 = self.signatures[block[j]]
                         if not self.default_embeddings:
                             # Replace default embedding 
                             sig1['paperVector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
@@ -205,6 +206,8 @@ class Clusterer():
                         features.append(self.featurization_function(sig1, sig2))
                         mapper[feature_idx] = (i,j)
                         feature_idx += 1
+                    # In case we have no info for any of the two signatures
+                    # we set their distance to 1
                     else:
                         d_matrix[i,j] = 1
         
@@ -217,22 +220,26 @@ class Clusterer():
 
         return d_matrix + np.transpose(d_matrix)
 
-    def get_dmatrix_dict(self, block_dict):
-
+    def get_dmatrix_dict(self, block_dict: Dict[str, List[str]]) -> Dict[str, np.ndarray]:
+        """Calculates distance matrices for each block in the block_dict"""
         block_to_dmatrix = {}
         for block_name in tqdm(block_dict):
             block = block_dict[block_name]
-            dmatrix = self.get_distance_matrix(block, self.signatures)
+            dmatrix = self.get_distance_matrix(block)
             block_to_dmatrix[block_name] = dmatrix
         return block_to_dmatrix
 
-    def predict(self, block_dict, block_to_dmatrix=None):
-
+    def predict(
+        self, 
+        block_dict: Dict[str, List[str]], 
+        block_to_dmatrix: Dict[str, np.ndarray] = None
+    ) -> Dict[str, str]:
+        """Predicts clusters for signatures in block_dict"""
         sign_to_pred_clusters = {}
         for block_name in block_dict:
             block = block_dict[block_name]
             if block_to_dmatrix is None:
-                dmatrix = self.get_distance_matrix(block, self.signatures)
+                dmatrix = self.get_distance_matrix(block)
             else:
                 dmatrix = block_to_dmatrix[block_name]
             # Resolve issue with dmatrix of 1 element in agglomerative clustering
@@ -252,19 +259,26 @@ class Clusterer():
         return sign_to_pred_clusters
 
 class DummyClusterer():
-
+    """
+    Dummy class used due to compatibilty issues with cluster_eval function 
+    which is provided by S2AND. Must implement predict method that maps
+    cluster names to their signatures
+    """
     def __init__(self, source) -> None:
-        
+        """Inits class by loading the clustering result files"""
         if isinstance(source, str):
             with open(source) as f:
                 self.sign_to_pred_cluster = json.load(f)
         else:
             self.sign_to_pred_cluster = source
             
-    def predict(self, block_dict, dataset, use_s2_clusters) -> dict:
-        
-        # dataset and use_s2_clusters are placed only for compatibility reasons
-        
+    def predict(
+        self, 
+        block_dict: Dict[str, List[str]], 
+        dataset: ANDData, 
+        use_s2_clusters: bool
+    ) -> Dict[str, List[str]]:
+        """Creates dict that maps cluster name to the signatures it owns"""    
         pred_clusters = {}
         uknown_id = 0
         for signatures in block_dict.values():
@@ -278,5 +292,4 @@ class DummyClusterer():
                         pred_clusters[cluster] = [signature]
                     else:
                         pred_clusters[cluster].append(signature)
-        
         return pred_clusters, None 
