@@ -1,6 +1,7 @@
 import json 
 import torch
 import numpy as np
+from collections import defaultdict
 from typing import Callable, Union, List, Dict
 from tqdm import tqdm
 from joblib import load
@@ -151,7 +152,7 @@ class DummyClusterer():
         """
         Creates dict that maps cluster name to the signatures it owns
         """    
-        pred_clusters = {}
+        pred_clusters = defaultdict(list)
         uknown_id = 0
         for signatures in block_dict.values():
             for signature in signatures:
@@ -160,8 +161,5 @@ class DummyClusterer():
                     uknown_id += 1
                 else:
                     cluster = self.sign_to_pred_cluster[signature]
-                    if cluster not in pred_clusters:
-                        pred_clusters[cluster] = [signature]
-                    else:
-                        pred_clusters[cluster].append(signature)
+                    pred_clusters[cluster].append(signature)
         return pred_clusters, None 
