@@ -11,7 +11,7 @@ git clone https://github.com/atypon/S2AND.git
 cd S2AND
 conda create -y --name s2and python==3.7
 conda activate s2and
-pip install -r requirements.in
+pip install -e .
 ```
 
 If you run into cryptic errors about GCC on macOS while installing the requirments, try this instead:
