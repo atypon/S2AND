@@ -4,7 +4,7 @@ import numpy as np
 from typing import List, Dict, Union
 from s2and.data import ANDData
 from s2and.eval import cluster_eval
-from s2and_ext.clustering_models import Clusterer, DummyClusterer
+from s2and.extentions.clustering_models import Clusterer, DummyClusterer
 
 class Objective():
     """

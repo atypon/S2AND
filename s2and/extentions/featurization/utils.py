@@ -3,7 +3,7 @@ import numpy as np
 from typing import Dict, List, Tuple, Callable
 from Levenshtein import distance
 from torch.nn import functional as F
-from s2and_ext.featurization.featurizer import Featurizer
+from s2and.extentions.featurization.featurizer import Featurizer
 
 
 def extract_feature(

@@ -1,7 +1,7 @@
 import json 
 import numpy as np
 from typing import Callable, Dict, Tuple, Union
-from s2and_ext.utils import load_dataset, load_signatures
+from s2and.extentions.utils import load_dataset, load_signatures
 
 class Featurizer():
     '''

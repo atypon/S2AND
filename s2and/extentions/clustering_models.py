@@ -7,7 +7,7 @@ from tqdm import tqdm
 from joblib import load
 from s2and.data import ANDData
 from sklearn.cluster import DBSCAN, AgglomerativeClustering
-from s2and_ext.utils import load_signatures
+from s2and.extentions.utils import load_signatures
 
 class Clusterer():
     """

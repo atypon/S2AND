@@ -1,5 +1,5 @@
-from utils.configs import load_configurations
-from s2and_ext.dataset_embedding import ONNXModel, embed_s2and
+from s2and.utils.configs import load_configurations
+from s2and.extentions.dataset_embedding import ONNXModel, embed_s2and
 
 if __name__ == "__main__":
 
