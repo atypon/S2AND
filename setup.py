@@ -8,7 +8,8 @@ requirements = [r for r in open(requirements_file).read().split("\n") if not re.
 setuptools.setup(
     name="s2and",
     version="0.1",
-    url="https://github.com/allenai/S2AND",
+    url="https://github.com/atypon/S2AND.git",
     packages=setuptools.find_packages(),
     install_requires=requirements,  # dependencies specified in requirements.in
+    description='Modified S2AND approach for author name disambiguation',
 )

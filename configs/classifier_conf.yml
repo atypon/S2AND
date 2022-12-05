@@ -1,9 +1,19 @@
 mlflow:
-  tracking_uri: 'file:mlruns' # Can be remote server as well eg https://my-tracking-server:5000
-  experiment_name: 'AND-lightgbm-training'
+  tracking_uri: 'mlruns' #'https://mlflow-demo.atypon.com/'
+  experiment_name: 'Default'
   run_name: 'doc2vec_sparse_0_23'
-datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
-default_embeddings: True
-#external_embeddings_dir: 'external_embeddings/random_embedder'
-external_embeddings_dir: None
-model_path: 'models/lightgbm_sparse_0_23.joblib'
+model:
+  objective: 'binary'
+  tree_learner: 'data'
+  verbosity: -1
+  n_jobs: 15
+  metric: 'auc'
+  random_state: 42
+data:
+  datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
+  default_embeddings: True
+  #external_embeddings_dir: 'external_embeddings/random_embedder'
+  external_embeddings_dir: None
+results:
+  results_folder: 'results'
+  model_path: 'models/lightgbm_sparse_0_23.joblib'

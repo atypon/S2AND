@@ -1,8 +1,8 @@
 mlflow:
-  tracking_uri: 'file:mlruns' # Can be remote server as well eg https://my-tracking-server:5000
-  experiment_name: 'AND-clustering'
+  tracking_uri: 'file:mlruns' #'https://mlflow-demo.atypon.com/'
+  experiment_name: 'Default'
   run_name: 'doc2vec_sparse_0_23'
-datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
+datasets: ['pubmed'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 model_source: 'models/lightgbm_sparse_0_23.joblib'
 default_embeddings: True
 #external_embeddings_dir: 'external_embeddings/random_embedder'
