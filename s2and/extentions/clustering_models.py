@@ -65,8 +65,8 @@ class Clusterer():
                         sig2 = self.signatures[block[j]]
                         if not self.default_embeddings:
                             # Replace default embedding 
-                            sig1['paperVector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
-                            sig2['paperVector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
+                            sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
+                            sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
                         features.append(self.featurization_function(sig1, sig2))
                         mapper[feature_idx] = (i,j)
                         feature_idx += 1
