@@ -1,7 +1,7 @@
 mlflow:
-  tracking_uri: 'mlruns' #'https://mlflow-demo.atypon.com/'
-  experiment_name: 'Default'
-  run_name: 'doc2vec_sparse_0_23'
+  tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
+  experiment_name: 'AND-lightgbm-training'
+  run_name: 'lightgbm-new-datasets'
 model:
   objective: 'binary'
   tree_learner: 'data'
@@ -16,4 +16,4 @@ data:
   external_embeddings_dir: None
 results:
   results_folder: 'results'
-  model_path: 'models/lightgbm_sparse_0_23.joblib'
+  model_path: 'models/lightgbm.joblib'

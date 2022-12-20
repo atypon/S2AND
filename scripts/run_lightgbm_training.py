@@ -56,7 +56,7 @@ if __name__ == "__main__":
     )
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
-    with mlflow.start_run(experiment_id=experiment_id, tags={'datasets': cfg.data.datasets}, run_name=cfg.mlflow.run_name):
+    with mlflow.start_run(experiment_id=experiment_id, tags={'datasets': str(cfg.data.datasets)}, run_name=cfg.mlflow.run_name):
         run_lightgbm_experiment(
             X_train=X_train, 
             y_train=y_train, 
