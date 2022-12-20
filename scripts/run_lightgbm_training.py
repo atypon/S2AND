@@ -9,6 +9,7 @@ from s2and.utils.mlflow import get_or_create_experiment
 from sklearn.metrics import classification_report, f1_score
 from s2and.extentions.featurization.utils import get_matrices, featurizing_function
 from s2and.extentions.classification_models import LightGBMWrapper
+from s2and.eval import pairwise_eval
 
 
 def run_lightgbm_experiment(
@@ -18,7 +19,8 @@ def run_lightgbm_experiment(
     y_test: np.ndarray,
     results_folder: str,
     model_path: str,
-    model_hyperparams: Dict[str, Union[str, float, int]]
+    model_hyperparams: Dict[str, Union[str, float, int]],
+    run_name: str
 ) -> None:
     """
     Train, evaluate and then same lightgbm model
@@ -42,6 +44,22 @@ def run_lightgbm_experiment(
     # Save model as LightGB wrapper that implements predict_distance method
     model = LightGBMWrapper(model)
     joblib.dump(model, model_path)
+    feature_names = [
+        'emb. sim',
+        'name dist.',
+        'jc aff.',
+        'jc fos0',
+        'jc fos1',
+        'jc coauth.',
+        'oa id',
+        's2 id',
+        'orc id'
+    ]
+    pairwise_eval(X_test, y_test, model.model, figs_path=results_folder, 
+                title=run_name, shap_feature_names=feature_names)
+    mlflow.log_artifact(join(results_folder, f'{run_name}_pr.png'))
+    mlflow.log_artifact(join(results_folder, f'{run_name}_roc.png'))
+    mlflow.log_artifact(join(results_folder, f'{run_name}_shap.png'))
 
 
 if __name__ == "__main__":
@@ -64,5 +82,6 @@ if __name__ == "__main__":
             y_test=y_val, 
             results_folder=cfg.results.results_folder,
             model_path=cfg.results.model_path,
-            model_hyperparams=cfg.model
+            model_hyperparams=cfg.model,
+            run_name=cfg.mlflow.run_name
         )
