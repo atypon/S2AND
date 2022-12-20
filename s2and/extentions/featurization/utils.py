@@ -34,8 +34,6 @@ def cosine_sim(
     if (v1 is not None) and (v2 is not None):
         v1 = torch.Tensor(v1)
         v2 = torch.Tensor(v2)
-        v1[torch.abs(v1) < 0.23] = 0
-        v2[torch.abs(v2) < 0.23] = 0
         return F.cosine_similarity(v1, v2, dim=0).item()
     return np.nan
 
