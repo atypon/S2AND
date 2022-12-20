@@ -1,7 +1,7 @@
 mlflow:
   tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
   experiment_name: AND-clustering
-  run_name: new_data
+  run_name: clusterer-new-datasets
 datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 model_source: 'models/lightgbm.joblib'
 default_embeddings: True

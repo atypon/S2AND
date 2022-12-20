@@ -47,8 +47,8 @@ def name_distance(
     Computes levenshtein distance of s2AuthorName attribute.
     If attribute is missing, return np.nan
     """
-    v1 = sig1.get('OAName', None)
-    v2 = sig2.get('OAName', None)
+    v1 = sig1.get('OAname', None)
+    v2 = sig2.get('OAname', None)
     if (v1 is not None) and (v2 is not None):
         return distance(v1,v2)
     return np.nan
@@ -88,7 +88,7 @@ def featurizing_function(
     features.append(jaccard(sig1, sig2, 'coAuthorShortNormNames'))
 
     # Ids for later use from the ensemble
-    features.append(extract_feature(sig1, sig2, 'OAAuthorId'))
+    features.append(extract_feature(sig1, sig2, 'OAauthorId'))
     features.append(extract_feature(sig1, sig2, 'S2authorId'))
     features.append(extract_feature(sig1, sig2, 'orcid'))
     return features
