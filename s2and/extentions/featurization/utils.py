@@ -73,7 +73,7 @@ def jaccard(
 def featurizing_function(
     sig1: Dict[str, dict],
     sig2: Dict[str, dict]
-) -> float:
+) -> List[float]:
     """
     Calculates the feature vector of two given signature dicts
     """
