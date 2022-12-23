@@ -42,8 +42,8 @@ class Featurizer():
                 sig1 = self.extended_signatures[pair[0]]
                 sig2 = self.extended_signatures[pair[1]]
                 if not self.default_embeddings:
-                    sig1['paperVector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
-                    sig2['paperVector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
+                    sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
+                    sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
                 X.append(self.featurizing_function(sig1, sig2))
         return np.asarray(X), np.asarray(y)
 

@@ -29,13 +29,11 @@ def cosine_sim(
     Computes cosine similarity of paperVector field of signature.
     If field is missing, returns np.nan
     """
-    v1 = sig1.get('paperVector', None)
-    v2 = sig2.get('paperVector', None)
+    v1 = sig1.get('vector', None)
+    v2 = sig2.get('vector', None)
     if (v1 is not None) and (v2 is not None):
         v1 = torch.Tensor(v1)
         v2 = torch.Tensor(v2)
-        v1[torch.abs(v1) < 0.23] = 0
-        v2[torch.abs(v2) < 0.23] = 0
         return F.cosine_similarity(v1, v2, dim=0).item()
     return np.nan
 
@@ -47,8 +45,8 @@ def name_distance(
     Computes levenshtein distance of s2AuthorName attribute.
     If attribute is missing, return np.nan
     """
-    v1 = sig1.get('s2AuthorName', None)
-    v2 = sig2.get('s2AuthorName', None)
+    v1 = sig1.get('OAname', None)
+    v2 = sig2.get('OAname', None)
     if (v1 is not None) and (v2 is not None):
         return distance(v1,v2)
     return np.nan
@@ -75,22 +73,22 @@ def jaccard(
 def featurizing_function(
     sig1: Dict[str, dict],
     sig2: Dict[str, dict]
-) -> float:
+) -> List[float]:
     """
     Calculates the feature vector of two given signature dicts
     """
     features = []
     features.append(cosine_sim(sig1, sig2))
     features.append(name_distance(sig1, sig2))
-    features.append(jaccard(sig1, sig2, 'affiliationIds'))
-    features.append(jaccard(sig1, sig2, 'fosIdsLevel0'))
-    features.append(jaccard(sig1, sig2, 'fosIdsLevel1'))
-    features.append(jaccard(sig1, sig2, 'authorNormNames'))
+    features.append(jaccard(sig1, sig2, 'affiliationsIds'))
+    features.append(jaccard(sig1, sig2, 'OAfos_0'))
+    features.append(jaccard(sig1, sig2, 'OAfos_1'))
+    features.append(jaccard(sig1, sig2, 'coAuthorShortNormNames'))
 
     # Ids for later use from the ensemble
-    features.append(extract_feature(sig1, sig2, 'magAuthorId'))
-    features.append(extract_feature(sig1, sig2, 's2AuthorId'))
-    features.append(extract_feature(sig1, sig2, 'orcId'))
+    features.append(extract_feature(sig1, sig2, 'OAauthorId'))
+    features.append(extract_feature(sig1, sig2, 'S2authorId'))
+    features.append(extract_feature(sig1, sig2, 'orcid'))
     return features
 
 def get_matrices(

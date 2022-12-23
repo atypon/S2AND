@@ -28,13 +28,7 @@ Note that this software package comes with tools specifically designed to access
 
 For the data extended with PKG's info space, run the following command :
 
-`gsutil -m cp -r \
-  "gs://pkg-datasets/datasets/S2AND/aminer/" \
-  "gs://pkg-datasets/datasets/S2AND/arnetminer/" \
-  "gs://pkg-datasets/datasets/S2AND/kisti/" \
-  "gs://pkg-datasets/datasets/S2AND/pubmed/" \
-  "gs://pkg-datasets/datasets/S2AND/zbmath/" \
-  extended_data/`
+`gsutil -m cp -r gs://pkg-datasets/datasets/S2AND extended_data/`
 
 ## Configuration
 Modify the config file at `data/path_config.json`. This file should look like this

@@ -28,6 +28,7 @@ results/*
 external_embeddings/*
 !external_embeddings/.gitkeep
 
+legacy/
 mlruns/
 
 # C extensions

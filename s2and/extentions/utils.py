@@ -42,7 +42,8 @@ def load_signatures(dataset : str) -> Dict[str, dict]:
     """
     with open(f'extended_data/{dataset}/{dataset+"-signatures.json"}') as f:
         content = f.read().split('\n')
-        content.remove('')
+        if '' in content:
+            content.remove('')
         content = list(map(json.loads, content))
 
     return {entry['signature_id'] : entry for entry in content}

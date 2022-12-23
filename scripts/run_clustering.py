@@ -31,6 +31,6 @@ if __name__ == "__main__":
     print(f'Best parameters found after optimization : {best}')
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
-    with mlflow.start_run(experiment_id=experiment_id, tags={'datasets': cfg.datasets}, run_name=cfg.mlflow.run_name):
+    with mlflow.start_run(experiment_id=experiment_id, tags={'datasets': str(cfg.datasets)}, run_name=cfg.mlflow.run_name):
         mlflow.log_params(best)
         objective.evaluate_best(best_params=best)

@@ -1,0 +1,2 @@
+model_source: models/lightgbm.joblib
+onnx_dest: models/lightgbm.onnx
