@@ -23,6 +23,7 @@ if __name__ == "__main__":
         default_embeddings=True,
         external_emb_dir=None
     )
+    # Convertion
     update_registered_converter(
         lgb.LGBMClassifier, 'LightGbmLGBMClassifier',
         calculate_linear_classifier_output_shapes, convert_lightgbm,
@@ -33,6 +34,7 @@ if __name__ == "__main__":
         target_opset=12)
     with open(cfg.onnx_dest, "wb") as f:
         f.write(model_onnx.SerializeToString())
+    # Testing
     sess = rt.InferenceSession(cfg.onnx_dest)
     pred_onx = sess.run(None, {"input": X_train.astype(np.float32)})
     y_onnx = np.asarray([pred[0] for pred in pred_onx[1]])
