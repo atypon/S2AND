@@ -5,13 +5,13 @@ if __name__ == "__main__":
 
     cfg = load_configurations(path='configs/inference_conf.yaml')
     model = ONNXModel(
-        path_to_onnx=cfg.model.path, 
+        path_to_onnx=cfg.model.path,
         tokenizer_pretrained_model=cfg.tokenizer.pretrained_model,
         tokenizer_max_length=cfg.tokenizer.max_length,
         inputs=cfg.model.inputs
     )
     embed_s2and(
-        model=model, 
+        model=model,
         model_name=cfg.model.name,
         data_dir=cfg.data_dir,
         extended_data_dir=cfg.extended_data_dir,
