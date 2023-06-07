@@ -18,7 +18,7 @@ def load_dataset(dataset_name: str) -> ANDData:
             signatures=join(parent_dir, f"{dataset_name}_signatures.json"),
             papers=join(parent_dir, f"{dataset_name}_papers.json"),
             mode="train",
-            specter_embeddings=join(parent_dir, f"{dataset_name}_specter.pickle"),
+            specter_embeddings=None,
             clusters=join(parent_dir, f"{dataset_name}_clusters.json"),
             block_type="s2",
             train_pairs_size=100000,
