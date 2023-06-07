@@ -84,7 +84,7 @@ def featurizing_function(
     features = []
     features.append(cosine_sim(sig1, sig2))
     features.append(name_distance(sig1, sig2))
-    features.append(jaccard(sig1, sig2, 'affiliationsIds'))
+    features.append(jaccard(sig1, sig2, 'affiliationIds'))
     features.append(jaccard(sig1, sig2, 'conceptIdsLevel0'))
     features.append(jaccard(sig1, sig2, 'conceptIdsLevel1'))
     features.append(jaccard(sig1, sig2, 'oaCoAuthorNormNames'))
