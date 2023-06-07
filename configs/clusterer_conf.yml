@@ -4,6 +4,4 @@ mlflow:
   run_name: clusterer-new-datasets
 datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 model_source: 'models/lightgbm.joblib'
-default_embeddings: True
-#external_embeddings_dir: 'external_embeddings/random_embedder'
-external_embeddings_dir: None
+external_embeddings_dir: Null

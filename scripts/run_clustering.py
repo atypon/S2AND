@@ -1,5 +1,4 @@
 import mlflow
-from os.path import join
 from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
 from s2and.extentions.utils import load_dataset
@@ -18,12 +17,7 @@ if __name__ == "__main__":
             combined_classifier=cfg.model_source,
             dataset_name=dataset_name,
             featurization_function=featurizing_function,
-            default_embeddings=cfg.default_embeddings,
-            embeddings_path=join(
-                cfg.external_embeddings_dir,
-                dataset_name,
-                f'{dataset_name}_embeddings.json'
-            ),
+            embeddings_dir=cfg.external_embeddings_dir,
             clusterer='dbscan'
         ) for dataset_name in cfg.datasets
     ]

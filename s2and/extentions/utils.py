@@ -12,8 +12,8 @@ from s2and.data import ANDData
 
 def load_dataset(dataset_name: str) -> ANDData:
 
-    parent_dir = f"data/{dataset_name}/"
-    if not os.path.isfile(f'pickled_datasets/{dataset_name}.pickle'):
+    parent_dir = join('data', dataset_name)
+    if not os.path.isfile(join('pickled_datasets', f'{dataset_name}.pickle')):
         dataset = ANDData(
             signatures=join(parent_dir, f"{dataset_name}_signatures.json"),
             papers=join(parent_dir, f"{dataset_name}_papers.json"),
@@ -28,10 +28,10 @@ def load_dataset(dataset_name: str) -> ANDData:
             n_jobs=4,
             preprocess=False
         )
-        with open(f'pickled_datasets/{dataset_name}.pickle', 'wb') as f:
+        with open(join('pickled_datasets', f'{dataset_name}.pickle'), 'wb') as f:
             pickle.dump(dataset, f)
     else:
-        with open(f'pickled_datasets/{dataset_name}.pickle', 'rb') as f:
+        with open(join('pickled_datasets', f'{dataset_name}.pickle'), 'rb') as f:
             dataset = pickle.load(f)
             print('Loaded dataset from pickle...')
     return dataset
@@ -41,7 +41,7 @@ def load_signatures(dataset: str) -> Dict[str, dict]:
     """
     Load sigatures data and store them in dict
     """
-    with open(f'extended_data/{dataset}/{dataset+"-signatures.json"}') as f:
+    with open(join('extended_data', f'{dataset}-signatures.json')) as f:
         content = f.read().split('\n')
         if '' in content:
             content.remove('')

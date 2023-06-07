@@ -2,6 +2,7 @@ import json
 import torch
 import numpy as np
 from collections import defaultdict
+from os.path import join
 from typing import Callable, Union, List, Dict
 from tqdm import tqdm
 from joblib import load
@@ -21,18 +22,18 @@ class Clusterer():
         combined_classifier: str,
         dataset_name: str,
         featurization_function: Callable,
-        default_embeddings: bool = True,
-        embeddings_path: Union[str, None] = None,
+        embeddings_dir: Union[str, None] = None,
         clusterer: str = 'dbscan'
     ) -> None:
 
         self.signatures = load_signatures(dataset_name)
         self.featurization_function = featurization_function
-        self.default_embeddings = default_embeddings
-        self.embeddings_path = embeddings_path
-        if not default_embeddings:
-            with open(embeddings_path) as f:
+        self.embeddings_path = join(embeddings_dir, dataset_name, f'{dataset_name}_embeddings.json')
+        if embeddings_dir is not None:
+            with open(self.embeddings_path) as f:
                 self.paper_ids_to_emb = json.load(f)
+        else:
+            self.paper_ids_to_emb = None
 
         self.model = load(combined_classifier)
         self.clusterer_name = clusterer
@@ -70,7 +71,7 @@ class Clusterer():
                     if block[i] in self.signatures and block[j] in self.signatures:
                         sig1 = self.signatures[block[i]]
                         sig2 = self.signatures[block[j]]
-                        if not self.default_embeddings:
+                        if self.paper_ids_to_emb is not None:
                             # Replace default embedding
                             sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
                             sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]

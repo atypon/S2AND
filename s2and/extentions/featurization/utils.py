@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from typing import Dict, List, Tuple, Callable
+from typing import Dict, List, Tuple, Callable, Union
 from Levenshtein import distance
 from torch.nn import functional as F
 from s2and.extentions.featurization.featurizer import Featurizer
@@ -100,8 +100,7 @@ def get_matrices(
     datasets: List[str],
     featurizing_function: Callable,
     remove_nan: bool = True,
-    default_embeddings: bool = True,
-    external_emb_dir: str = None
+    external_emb_dir: Union[str, None] = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     '''
     Featurize multiple datasets and return the combined matrix
@@ -111,11 +110,9 @@ def get_matrices(
     X_val, y_val = [], []
     X_test, y_test = [], []
     for dataset_name in datasets:
-        embeddings_path = f'{external_emb_dir}/{dataset_name}/{dataset_name}_embeddings.json'
         featurizer = Featurizer(dataset_name=dataset_name,
                                 featurizing_function=featurizing_function,
-                                default_embeddings=default_embeddings,
-                                embeddings_path=embeddings_path)
+                                embeddings_dir=external_emb_dir)
         X, y = featurizer.get_feature_matrix('train')
         X_train.append(X)
         y_train.append(y)

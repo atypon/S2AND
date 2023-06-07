@@ -1,7 +1,7 @@
 mlflow:
   tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
   experiment_name: 'AND-lightgbm-training'
-  run_name: 'lightgbm-new-datasets'
+  run_name: 'new-data-improvements'
 model:
   objective: 'binary'
   tree_learner: 'data'
@@ -11,9 +11,7 @@ model:
   random_state: 42
 data:
   datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
-  default_embeddings: True
-  #external_embeddings_dir: 'external_embeddings/random_embedder'
-  external_embeddings_dir: None
+  external_embeddings_dir: Null
 results:
   results_folder: 'results'
   model_path: 'models/lightgbm.joblib'

@@ -75,7 +75,6 @@ if __name__ == "__main__":
         datasets=cfg.data.datasets,
         featurizing_function=featurizing_function,
         remove_nan=False,
-        default_embeddings=cfg.data.default_embeddings,
         external_emb_dir=cfg.data.external_embeddings_dir
     )
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
