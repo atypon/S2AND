@@ -1,4 +1,7 @@
-import os, onnxruntime, json, logging
+import os
+import onnxruntime
+import json
+import logging
 
 from os.path import join
 from transformers import AutoTokenizer
@@ -12,26 +15,32 @@ ch.setFormatter(formatter)
 ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 
+
 class ONNXModel():
     """Class that implements model using ONNX runtime"""
 
     def __init__(self, path_to_onnx, tokenizer_pretrained_model, tokenizer_max_length, inputs):
         """Initiliaze model"""
-        self.model = onnxruntime.InferenceSession(path_to_onnx, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+        self.model = onnxruntime.InferenceSession(
+            path_to_onnx,
+            providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
+        )
         self.tokenizer_max_length = tokenizer_max_length
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_pretrained_model)
         self.inputs = inputs
-        
+
     def forward(self, text):
         """Implement models forward method"""
-        tokens = self.tokenizer(text,
-                    add_special_tokens=True,
-                    max_length=self.tokenizer_max_length,
-                    return_token_type_ids=True,
-                    padding='max_length',
-                    return_attention_mask=True,
-                    return_tensors='np',
-                    truncation=True)
+        tokens = self.tokenizer(
+            text,
+            add_special_tokens=True,
+            max_length=self.tokenizer_max_length,
+            return_token_type_ids=True,
+            padding='max_length',
+            return_attention_mask=True,
+            return_tensors='np',
+            truncation=True
+        )
 
         # Hold only those inputs that are set to True in yml file
         ort_inputs = {}
@@ -39,12 +48,12 @@ class ONNXModel():
             if value:
                 ort_inputs[input_label] = tokens[input_label]
 
-        return self.model.run(None, ort_inputs)[0][:,0,:].squeeze(0).tolist()
+        return self.model.run(None, ort_inputs)[0][:, 0, :].squeeze(0).tolist()
+
 
 def embed_s2and(model, model_name, data_dir, extended_data_dir, embeddings_dir):
     """
     Embed datasets regarding s2and framework
-    
     :param model: Model that implements forward method and infers vectors
     :param model_name: Name of the model
     :param data_dir: Directory of s2and dataset
@@ -66,7 +75,9 @@ def embed_s2and(model, model_name, data_dir, extended_data_dir, embeddings_dir):
         logger.info(f'Embedding S2AND {dataset_name}...')
         with open(join(data_dir, dataset_name, f'{dataset_name}_papers.json')) as f:
             papers = json.load(f)
-        signatures = parse_jsonl(join(extended_data_dir, dataset_name, f'{dataset_name}-signatures.json'))
+        signatures = parse_jsonl(
+            join(extended_data_dir, dataset_name, f'{dataset_name}-signatures.json')
+        )
 
         if not os.path.isdir(embeddings_dir):
             os.mkdir(embeddings_dir)

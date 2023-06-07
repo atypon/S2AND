@@ -7,9 +7,9 @@ from s2and.extentions.featurization.featurizer import Featurizer
 
 
 def extract_feature(
-    sig1: Dict[str, dict], 
+    sig1: Dict[str, dict],
     sig2: Dict[str, dict],
-    attribute : str
+    attribute: str
 ) -> float:
     """
     Returns 1 if attribute is equal in sig1 and sig2 otherwise 0.
@@ -21,8 +21,9 @@ def extract_feature(
         return 0
     return np.nan
 
+
 def cosine_sim(
-    sig1: Dict[str, dict], 
+    sig1: Dict[str, dict],
     sig2: Dict[str, dict]
 ) -> float:
     """
@@ -37,6 +38,7 @@ def cosine_sim(
         return F.cosine_similarity(v1, v2, dim=0).item()
     return np.nan
 
+
 def name_distance(
     sig1: Dict[str, dict],
     sig2: Dict[str, dict]
@@ -48,11 +50,12 @@ def name_distance(
     v1 = sig1.get('OAname', None)
     v2 = sig2.get('OAname', None)
     if (v1 is not None) and (v2 is not None):
-        return distance(v1,v2)
+        return distance(v1, v2)
     return np.nan
 
+
 def jaccard(
-    sig1: Dict[str, dict], 
+    sig1: Dict[str, dict],
     sig2: Dict[str, dict],
     attribute: str
 ) -> float:
@@ -69,6 +72,7 @@ def jaccard(
             return len(v1.intersection(v2)) / len(v1.union(v2))
         return 0
     return np.nan
+
 
 def featurizing_function(
     sig1: Dict[str, dict],
@@ -91,10 +95,11 @@ def featurizing_function(
     features.append(extract_feature(sig1, sig2, 'orcid'))
     return features
 
+
 def get_matrices(
-    datasets : List[str], 
-    featurizing_function : Callable, 
-    remove_nan : bool =True,
+    datasets: List[str],
+    featurizing_function: Callable,
+    remove_nan: bool = True,
     default_embeddings: bool = True,
     external_emb_dir: str = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -107,7 +112,7 @@ def get_matrices(
     X_test, y_test = [], []
     for dataset_name in datasets:
         embeddings_path = f'{external_emb_dir}/{dataset_name}/{dataset_name}_embeddings.json'
-        featurizer = Featurizer(dataset_name=dataset_name, 
+        featurizer = Featurizer(dataset_name=dataset_name,
                                 featurizing_function=featurizing_function,
                                 default_embeddings=default_embeddings,
                                 embeddings_path=embeddings_path)

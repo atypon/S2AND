@@ -1,7 +1,8 @@
-import json 
+import json
 import numpy as np
 from typing import Callable, Dict, Tuple, Union
 from s2and.extentions.utils import load_dataset, load_signatures
+
 
 class Featurizer():
     '''
@@ -9,9 +10,9 @@ class Featurizer():
     '''
 
     def __init__(
-        self, 
-        dataset_name: str, 
-        featurizing_function: Callable, 
+        self,
+        dataset_name: str,
+        featurizing_function: Callable,
         default_embeddings: bool = True,
         embeddings_path: Union[None, str] = None
     ) -> None:
@@ -31,7 +32,7 @@ class Featurizer():
     def featurize_pairs(self, pairs: Tuple[Dict[str, dict]]) -> Tuple[np.ndarray]:
         '''
         Given the list of pairs return the matrix of features and labels
-        '''  
+        '''
         X = []
         y = []
         for pair in pairs:
