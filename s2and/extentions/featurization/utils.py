@@ -87,7 +87,7 @@ def featurizing_function(
     features.append(jaccard(sig1, sig2, 'affiliationIds'))
     features.append(jaccard(sig1, sig2, 'conceptIdsLevel0'))
     features.append(jaccard(sig1, sig2, 'conceptIdsLevel1'))
-    features.append(jaccard(sig1, sig2, 'oaCoAuthorNormNames'))
+    features.append(jaccard(sig1, sig2, 'oaCoAuthorIds'))
 
     # Ids for later use from the ensemble
     features.append(extract_feature(sig1, sig2, 'oaAuthorId'))

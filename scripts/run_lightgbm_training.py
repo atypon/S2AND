@@ -50,7 +50,7 @@ def run_lightgbm_experiment(
         'jc aff.',
         'jc fos0',
         'jc fos1',
-        'jc coauth.',
+        'jc coauth. ids.',
         'oa id',
         's2 id',
         'orc id'
