@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple, Union, Dict
 from s2and.extentions.featurization.featurizer import Featurizer
+from s2and import logger
 
 
 def get_matrices(
@@ -40,8 +41,11 @@ def get_matrices(
     X_test = np.vstack(X_test)
     y_test = np.concatenate(y_test)
     # Count nan per column for train set
-    print('Nan values for each feature :')
-    print(np.count_nonzero(np.isnan(X_train), axis=0))
+    nan_counts = {
+        feature['description']: count
+        for feature, count in zip(features, np.count_nonzero(np.isnan(X_train), axis=0))
+    }
+    logger.info(f'\nNan values for each feature :\n{nan_counts}')
     # Remove nan values
     if remove_nan:
         np.nan_to_num(X_train, copy=False)

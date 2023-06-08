@@ -10,6 +10,7 @@ from sklearn.metrics import classification_report, f1_score
 from s2and.extentions.featurization.utils import get_matrices
 from s2and.extentions.classification_models import LightGBMWrapper
 from s2and.eval import pairwise_eval
+from s2and import logger
 
 
 def run_lightgbm_experiment(
@@ -30,10 +31,8 @@ def run_lightgbm_experiment(
     model.fit(X_train, y_train)
     train_report = classification_report(y_train, model.predict(X_train))
     test_report = classification_report(y_test, model.predict(X_test))
-    print('\nTrain set evaluation')
-    print(train_report)
-    print('\nTest set evaluation')
-    print(test_report)
+    logger.info(f'\nTrain set evaluation\n{train_report}')
+    logger.info(f'\nTest set evaluation\n{test_report}')
     with open(join(results_folder, 'train_report.txt'), 'w') as f:
         f.write(train_report)
     with open(join(results_folder, 'test_report.txt'), 'w') as f:
