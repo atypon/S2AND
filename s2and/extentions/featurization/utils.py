@@ -42,7 +42,7 @@ def get_matrices(
     y_test = np.concatenate(y_test)
     # Count nan per column for train set
     nan_counts = {
-        feature['description']: count
+        f"{feature['operation']}({feature['field']})": count
         for feature, count in zip(features, np.count_nonzero(np.isnan(X_train), axis=0))
     }
     logger.info(f'\nNan values for each feature :\n{nan_counts}')

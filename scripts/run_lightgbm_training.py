@@ -43,6 +43,7 @@ def run_lightgbm_experiment(
     mlflow.log_artifact(join(results_folder, 'test_report.txt'))
     # Save model as LightGB wrapper that implements predict_distance method
     model = LightGBMWrapper(model)
+    feature_names = [f'{feature["operation"]}({feature["field"]})' for feature in features]
     joblib.dump(model, model_path)
     pairwise_eval(
         X_test,
@@ -50,13 +51,12 @@ def run_lightgbm_experiment(
         model.model,
         figs_path=results_folder,
         title=run_name,
-        shap_feature_names=[feature['description'] for feature in cfg.features]
+        shap_feature_names=feature_names
     )
     mlflow.log_artifact(join(results_folder, f'{run_name}_pr.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_roc.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_shap.png'))
-    features = [f'{feature["operation"]}({feature["field"]})' for feature in features]
-    mlflow.log_param('features', features)
+    mlflow.log_param('features', feature_names)
 
 
 if __name__ == "__main__":
