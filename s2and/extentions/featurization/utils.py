@@ -32,7 +32,7 @@ def get_matrices(
         X, y = featurizer.get_feature_matrix('test')
         X_test.append(X)
         y_test.append(y)
-        print(f'Processed {dataset_name}')
+        logger.info(f'Processed {dataset_name}')
 
     X_train = np.vstack(X_train)
     y_train = np.concatenate(y_train)
