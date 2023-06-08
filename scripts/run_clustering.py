@@ -6,6 +6,8 @@ from s2and.extentions.clustering_models import Clusterer
 from s2and.extentions.clustering_objective import Objective
 from s2and.utils.configs import load_configurations
 from s2and.utils.mlflow import get_or_create_experiment
+from s2and import logger
+
 
 if __name__ == "__main__":
 
@@ -32,7 +34,7 @@ if __name__ == "__main__":
         algo=tpe.suggest,
         max_evals=100
     )
-    print(f'Best parameters found after optimization : {best}')
+    logger.info(f'\nBest parameters found after optimization : {best}')
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
     with mlflow.start_run(

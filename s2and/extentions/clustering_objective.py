@@ -5,6 +5,7 @@ from typing import List, Dict, Union
 from s2and.data import ANDData
 from s2and.eval import cluster_eval
 from s2and.extentions.clustering_models import Clusterer, DummyClusterer
+from s2and import logger
 
 
 class Objective():
@@ -74,5 +75,5 @@ class Objective():
                 f'{dataset_name} B3 F1': metrics['B3 (P, R, F1)'][2],
             }
             mlflow.log_metrics(mlflow_metrics)
-            print(dataset_name)
-            print(metrics)
+            logger.info(f'\n{dataset_name}')
+            logger.info(f'\n{metrics}')
