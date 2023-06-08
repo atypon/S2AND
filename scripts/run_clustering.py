@@ -40,5 +40,7 @@ if __name__ == "__main__":
         tags={'datasets': str(cfg.datasets)},
         run_name=cfg.mlflow.run_name
     ):
+        features = [f'{feature["operation"]}({feature["field"]})' for feature in cfg.features]
+        mlflow.log_param('features', features)
         mlflow.log_params(best)
         objective.evaluate_best(best_params=best)

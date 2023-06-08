@@ -2,7 +2,7 @@ import joblib
 import mlflow
 import lightgbm as lgb
 import numpy as np
-from typing import Dict, Union
+from typing import Dict, Union, List
 from os.path import join
 from s2and.utils.configs import load_configurations
 from s2and.utils.mlflow import get_or_create_experiment
@@ -18,6 +18,7 @@ def run_lightgbm_experiment(
     y_train: np.ndarray,
     X_test: np.ndarray,
     y_test: np.ndarray,
+    features: List[Dict[str, str]],
     results_folder: str,
     model_path: str,
     model_hyperparams: Dict[str, Union[str, float, int]],
@@ -54,6 +55,8 @@ def run_lightgbm_experiment(
     mlflow.log_artifact(join(results_folder, f'{run_name}_pr.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_roc.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_shap.png'))
+    features = [f'{feature["operation"]}({feature["field"]})' for feature in features]
+    mlflow.log_param('features', features)
 
 
 if __name__ == "__main__":
@@ -77,6 +80,7 @@ if __name__ == "__main__":
             y_train=y_train,
             X_test=X_val,
             y_test=y_val,
+            features=cfg.features,
             results_folder=cfg.results.results_folder,
             model_path=cfg.results.model_path,
             model_hyperparams=cfg.model,
