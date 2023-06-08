@@ -8,7 +8,7 @@ features:
   - operation: cosine_similarity
     field: paperVector
   - operation: levenshtein
-    field: s2AuthorName
+    field: authorNormName
   - operation: jaccard_similarity
     field: affiliationIds
   - operation: jaccard_similarity
