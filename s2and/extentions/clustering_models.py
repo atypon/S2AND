@@ -3,12 +3,13 @@ import torch
 import numpy as np
 from collections import defaultdict
 from os.path import join
-from typing import Callable, Union, List, Dict
+from typing import Tuple, Any, Union, List, Dict
 from tqdm import tqdm
 from joblib import load
 from s2and.data import ANDData
 from sklearn.cluster import DBSCAN, AgglomerativeClustering
 from s2and.extentions.utils import load_signatures
+from s2and.extentions.featurization.operations import Registry
 
 
 class Clusterer():
@@ -21,15 +22,16 @@ class Clusterer():
         self,
         combined_classifier: str,
         dataset_name: str,
-        featurization_function: Callable,
+        features: List[Dict[str, str]],
         embeddings_dir: Union[str, None] = None,
         clusterer: str = 'dbscan'
     ) -> None:
 
         self.signatures = load_signatures(dataset_name)
-        self.featurization_function = featurization_function
-        self.embeddings_path = join(embeddings_dir, dataset_name, f'{dataset_name}_embeddings.json')
+        self.features = features
         if embeddings_dir is not None:
+            self.embeddings_path = join(embeddings_dir, dataset_name,
+                                        f'{dataset_name}_embeddings.json')
             with open(self.embeddings_path) as f:
                 self.paper_ids_to_emb = json.load(f)
         else:
@@ -75,7 +77,7 @@ class Clusterer():
                             # Replace default embedding
                             sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
                             sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
-                        features.append(self.featurization_function(sig1, sig2))
+                        features.append(self.__featurize_pair(signature_pair=(sig1, sig2)))
                         mapper[feature_idx] = (i, j)
                         feature_idx += 1
                     # In case we have no info for any of the two signatures
@@ -133,6 +135,20 @@ class Clusterer():
                 else:
                     sign_to_pred_clusters[signature] = block_name + '_' + str(cluster)
         return sign_to_pred_clusters
+
+    def __featurize_pair(self, signature_pair: Tuple[Dict[str, Any]]) -> List[Union[int, float]]:
+        """
+        Returns complete feature vector for the given signature pair
+        :param signature_pair: pair of signatures to be featurized
+        :return: feature vector
+        """
+        feature_vector = []
+        for feature in self.features:
+            operation_name = feature['operation']
+            field = feature['field']
+            operation = Registry.get_operation(operation_name=operation_name)
+            feature_vector.append(operation(signature_pair=signature_pair, field=field))
+        return feature_vector
 
 
 class DummyClusterer():

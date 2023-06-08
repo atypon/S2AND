@@ -1,8 +1,9 @@
 import json
 import numpy as np
 from os.path import join
-from typing import Callable, Dict, Tuple, Union
+from typing import Dict, Tuple, Union, List, Any
 from s2and.extentions.utils import load_dataset, load_signatures
+from s2and.extentions.featurization.operations import Registry
 
 
 class Featurizer():
@@ -13,7 +14,7 @@ class Featurizer():
     def __init__(
         self,
         dataset_name: str,
-        featurizing_function: Callable,
+        features: List[Dict[str, str]],
         embeddings_dir: Union[None, str] = None
     ) -> None:
         """
@@ -23,7 +24,7 @@ class Featurizer():
         """
         self.dataset = load_dataset(dataset_name)
         self.extended_signatures = load_signatures(dataset_name)
-        self.featurizing_function = featurizing_function
+        self.features = features
         if embeddings_dir is not None:
             with open(join(embeddings_dir, dataset_name, f'{dataset_name}_embeddings.json')) as f:
                 self.paper_ids_to_emb = json.load(f)
@@ -46,7 +47,7 @@ class Featurizer():
                 if self.paper_ids_to_emb is not None:
                     sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
                     sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
-                X.append(self.featurizing_function(sig1, sig2))
+                X.append(self.__featurize_pair(signature_pair=(sig1, sig2)))
         return np.asarray(X), np.asarray(y)
 
     def get_feature_matrix(self, split: str) -> Tuple[np.ndarray]:
@@ -61,3 +62,17 @@ class Featurizer():
             return self.featurize_pairs(val_pairs)
         elif split == 'test':
             return self.featurize_pairs(test_pairs)
+
+    def __featurize_pair(self, signature_pair: Tuple[Dict[str, Any]]) -> List[Union[int, float]]:
+        """
+        Returns complete feature vector for the given signature pair
+        :param signature_pair: pair of signatures to be featurized
+        :return: feature vector
+        """
+        feature_vector = []
+        for feature in self.features:
+            operation_name = feature['operation']
+            field = feature['field']
+            operation = Registry.get_operation(operation_name=operation_name)
+            feature_vector.append(operation(signature_pair=signature_pair, field=field))
+        return feature_vector

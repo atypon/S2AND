@@ -12,6 +12,34 @@ model:
 data:
   datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
   external_embeddings_dir: Null
+features:
+  - operation: cosine_similarity
+    field: paperVector
+    description: cos_sim(embedding)
+  - operation: levenshtein
+    field: s2AuthorName
+    description: name_distance
+  - operation: jaccard_similarity
+    field: affiliationIds
+    description: jc aff. ids.
+  - operation: jaccard_similarity
+    field: conceptIdsLevel0
+    description: jc fos 0
+  - operation: jaccard_similarity
+    field: conceptIdsLevel1
+    description: jc fos 1
+  - operation: jaccard_similarity
+    field: oaCoAuthorIds
+    description: jc coauth ids
+  - operation: equality
+    field: oaAuthorId
+    description: oa id
+  - operation: equality
+    field: s2AuthorId
+    description: s2 id
+  - operation: equality
+    field: orcId
+    description: orcid
 results:
   results_folder: 'results'
   model_path: 'models/lightgbm.joblib'

@@ -3,7 +3,6 @@ from hyperopt import fmin, tpe, hp
 from hyperopt.pyll import scope
 from s2and.extentions.utils import load_dataset
 from s2and.extentions.clustering_models import Clusterer
-from s2and.extentions.featurization.utils import featurizing_function
 from s2and.extentions.clustering_objective import Objective
 from s2and.utils.configs import load_configurations
 from s2and.utils.mlflow import get_or_create_experiment
@@ -16,7 +15,7 @@ if __name__ == "__main__":
         Clusterer(
             combined_classifier=cfg.model_source,
             dataset_name=dataset_name,
-            featurization_function=featurizing_function,
+            features=cfg.features,
             embeddings_dir=cfg.external_embeddings_dir,
             clusterer='dbscan'
         ) for dataset_name in cfg.datasets
