@@ -19,7 +19,10 @@ if __name__ == "__main__":
 
         df_old = spark.read.json(join(LEGACY_DIR, f'{dataset}-signatures.json')). \
             withColumnRenamed('orcid', 'orcId'). \
-            select(['signature_id', 'orcId'])
+            select(['signature_id', 'orcId', 'OAname', 'OAauthorId', 'coAuthorShortNormNames']). \
+            withColumnRenamed('OAname', 'OAname_old'). \
+            withColumnRenamed('OAauthorId', 'OAauthorId_old'). \
+            withColumnRenamed('coAuthorShortNormNames', 'coAuthorShortNormNames_old')
 
         df_gold = spark.read.json(join(EXTENDED_DATA_DIR, f'{dataset}-signatures.json'))
         orcids_before = df_gold.select('orcId').dropna().count()
