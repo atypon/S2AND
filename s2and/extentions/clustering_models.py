@@ -32,8 +32,8 @@ class Clusterer():
         if embeddings_dir is not None:
             self.embeddings_path = join(embeddings_dir, dataset_name,
                                         f'{dataset_name}_embeddings.json')
-            with open(self.embeddings_path) as f:
-                self.paper_ids_to_emb = json.load(f)
+            with open(self.embeddings_path) as embeddings_file:
+                self.paper_ids_to_emb = json.load(embeddings_file)
         else:
             self.paper_ids_to_emb = None
 
