@@ -26,8 +26,9 @@ class Featurizer():
         self.extended_signatures = load_signatures(dataset_name)
         self.features = features
         if embeddings_dir is not None:
-            with open(join(embeddings_dir, dataset_name, f'{dataset_name}_embeddings.json')) as f:
-                self.paper_ids_to_emb = json.load(f)
+            with open(join(embeddings_dir, dataset_name, f'{dataset_name}_embeddings.json')) \
+                  as embeddings_file:
+                self.paper_ids_to_emb = json.load(embeddings_file)
         else:
             self.paper_ids_to_emb = None
 
