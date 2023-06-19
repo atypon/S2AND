@@ -24,8 +24,7 @@ class BaseOperation():
         value2 = sig2.get(field, None)
         if value1 is None or value2 is None:
             return np.nan
-        else:
-            return self.calculate(values=(value1, value2))
+        return self.calculate(values=(value1, value2))
 
     @abstractmethod
     def calculate(self, values: Tuple[Any]) -> float:
@@ -45,4 +44,4 @@ class BaseOperation():
         """
         val1, val2 = values
         if not isinstance(val1, type) or not isinstance(val2, type):
-            raise Exception(f'{values} are of undesired type')
+            raise TypeError(f'{values} are of undesired type')
