@@ -147,8 +147,13 @@ class Clusterer():
             operation_name = feature['operation']
             field = feature['field']
             operation = Registry.get_operation(operation_name=operation_name)
-            feature_vector.append(operation(signature_pair=signature_pair, field=field))
-        return feature_vector
+            if 'operation_args' in feature:
+                operation_args = feature['operation_args']
+                feature_vector.append(
+                    operation(signature_pair=signature_pair, field=field, **operation_args)
+                )
+            else:
+                feature_vector.append(operation(signature_pair=signature_pair, field=field))
 
 
 class DummyClusterer():
