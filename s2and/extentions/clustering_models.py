@@ -154,6 +154,7 @@ class Clusterer():
                 )
             else:
                 feature_vector.append(operation(signature_pair=signature_pair, field=field))
+        return feature_vector
 
 
 class DummyClusterer():
