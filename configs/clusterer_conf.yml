@@ -12,15 +12,15 @@ features:
   - operation: jaccard_similarity
     field: affiliationIds
   - operation: jaccard_similarity
-    field: conceptIdsLevel0
-  - operation: jaccard_similarity
-    field: conceptIdsLevel1
-  - operation: jaccard_similarity
-    field: oaCoAuthorIds
-  - operation: equality
-    field: oaAuthorId
+    field: coAuthorShortNormNames_old
   - operation: equality
     field: s2AuthorId
   - operation: equality
     field: orcId
+  - operation: normalized_by_authors_absolute_difference
+    field: authorPositionNo
+    operation_args:
+      normalization_field: coAuthorShortNormNames_old
+  - operation: absolute_difference
+    field: pubYear
 external_embeddings_dir: Null

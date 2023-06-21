@@ -1,7 +1,7 @@
 mlflow:
   tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
   experiment_name: 'AND-lightgbm-training'
-  run_name: 'new-data-improvements'
+  run_name: 'feature-experiments'
 model:
   objective: 'binary'
   tree_learner: 'data'
@@ -9,6 +9,8 @@ model:
   n_jobs: 15
   metric: 'auc'
   random_state: 42
+  monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
+  monotone_constraints_method: advanced
 data:
   datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
   external_embeddings_dir: Null
@@ -20,17 +22,17 @@ features:
   - operation: jaccard_similarity
     field: affiliationIds
   - operation: jaccard_similarity
-    field: conceptIdsLevel0
-  - operation: jaccard_similarity
-    field: conceptIdsLevel1
-  - operation: jaccard_similarity
-    field: oaCoAuthorIds
-  - operation: equality
-    field: oaAuthorId
+    field: coAuthorShortNormNames_old
   - operation: equality
     field: s2AuthorId
   - operation: equality
     field: orcId
+  - operation: normalized_by_authors_absolute_difference
+    field: authorPositionNo
+    operation_args:
+      normalization_field: coAuthorShortNormNames_old
+  - operation: absolute_difference
+    field: pubYear
 results:
   results_folder: 'results'
   model_path: 'models/lightgbm.joblib'
