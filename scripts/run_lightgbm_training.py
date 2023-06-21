@@ -1,6 +1,7 @@
 import joblib
 import mlflow
 import lightgbm as lgb
+import matplotlib.pyplot as plt
 import numpy as np
 from typing import Dict, Union, List
 from os.path import join
@@ -57,6 +58,10 @@ def run_lightgbm_experiment(
     mlflow.log_artifact(join(results_folder, f'{run_name}_roc.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_shap.png'))
     mlflow.log_param('features', feature_names)
+    plt.figure()
+    lgb.plot_tree(model.model)
+    plt.savefig(join(results_folder, 'model_tree.png'), dpi=1000)
+    mlflow.log_artifact(join(results_folder, 'model_tree.png'))
 
 
 if __name__ == "__main__":
