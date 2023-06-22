@@ -1,7 +1,7 @@
 model: 
   source: models/lightgbm.joblib
   destination: models/lightgbm.onnx
-datasets: ['pubmed']
+datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 external_embeddings_dir: Null
 features:
   - operation: cosine_similarity
