@@ -48,7 +48,7 @@ class Featurizer():
                 if self.paper_ids_to_emb is not None:
                     sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
                     sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
-                X.append(self.__featurize_pair(signature_pair=(sig1, sig2)))
+                X.append(self.featurize_pair(signature_pair=(sig1, sig2)))
         return np.asarray(X), np.asarray(y)
 
     def get_feature_matrix(self, split: str) -> Tuple[np.ndarray]:
@@ -64,7 +64,7 @@ class Featurizer():
         elif split == 'test':
             return self.featurize_pairs(test_pairs)
 
-    def __featurize_pair(self, signature_pair: Tuple[Dict[str, Any]]) -> List[Union[int, float]]:
+    def featurize_pair(self, signature_pair: Tuple[Dict[str, Any]]) -> List[Union[int, float]]:
         """
         Returns complete feature vector for the given signature pair
         :param signature_pair: pair of signatures to be featurized

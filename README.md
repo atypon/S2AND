@@ -48,3 +48,5 @@ There are three main run scripts to perform the disambiguation process.
   * run_inference.py: Produces embeddings with the selected transformer model defined by an onnx file for all signatures in the data.
   * run_lightgbm_training.py: Trains lightgbm classifier to calculate distance between signatures.
   * run_clustering.py: Performs hyperparam optimization of the clusterer and clusters the signatures.
+  * run_lightgbm2onnx.py: Performs conversion of Lightgbm model to ONNX format.
+  * run_create_test_file.py: Creates test file for testing proper featurization and model inference.
