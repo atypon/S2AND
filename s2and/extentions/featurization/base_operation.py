@@ -1,6 +1,6 @@
 import numpy as np
 from abc import abstractmethod
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 
 
 class BaseOperation():
@@ -12,7 +12,7 @@ class BaseOperation():
         self,
         signature_pair: Tuple[Dict[str, Any], Dict[str, Any]],
         field: str
-    ) -> float:
+    ) -> Union[int, float, bool]:
         """
         Performs the operation with proper checking
         :param signature_pair: pair of signatures to be featurized
@@ -27,7 +27,7 @@ class BaseOperation():
         return self.calculate(values=(value1, value2))
 
     @abstractmethod
-    def calculate(self, values: Tuple[Any]) -> float:
+    def calculate(self, values: Tuple[Any]) -> Union[int, float, bool]:
         """
         Performs the calculation of the operation
         :param values: tuple of values to be featurized

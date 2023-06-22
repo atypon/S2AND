@@ -15,7 +15,7 @@ class Equality(BaseOperation):
 
     def calculate(self, values: Tuple[Any]) -> float:
         val1, val2 = values
-        return 1 if val1 == val2 else 0
+        return True if val1 == val2 else False
 
 
 @Registry.register_operation(operation_name='levenshtein')
