@@ -58,10 +58,12 @@ def run_lightgbm_experiment(
     mlflow.log_artifact(join(results_folder, f'{run_name}_roc.png'))
     mlflow.log_artifact(join(results_folder, f'{run_name}_shap.png'))
     mlflow.log_param('features', feature_names)
-    plt.figure()
-    lgb.plot_tree(model.model)
-    plt.savefig(join(results_folder, 'model_tree.png'), dpi=1000)
-    mlflow.log_artifact(join(results_folder, 'model_tree.png'))
+    # Plot the first 5 trees of lightgbm
+    for tree_index in range(min(5, len(model.model.booster_.dump_model()['tree_info']))):
+        plt.figure()
+        lgb.plot_tree(model.model, tree_index=tree_index, show_info=['data_percentage'])
+        plt.savefig(join(results_folder, f'model-tree-{tree_index}.png'), dpi=750)
+        mlflow.log_artifact(join(results_folder, f'model-tree-{tree_index}.png'))
 
 
 if __name__ == "__main__":
