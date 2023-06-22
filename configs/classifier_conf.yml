@@ -1,7 +1,7 @@
 mlflow:
   tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
   experiment_name: 'AND-lightgbm-training'
-  run_name: 'feature-experiments'
+  run_name: 'overfitting-experiments'
 model:
   objective: 'binary'
   tree_learner: 'data'
@@ -11,6 +11,10 @@ model:
   random_state: 42
   monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
   monotone_constraints_method: advanced
+  lambda_l1: 0.6
+  max_depth: 5
+  num_leaves: 8
+  max_bin: 128
 data:
   datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
   external_embeddings_dir: Null
