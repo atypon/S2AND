@@ -1,5 +1,6 @@
 import joblib
 import json
+from math import isnan
 from s2and.extentions.classification_models import LightGBMWrapper
 from s2and.utils.configs import load_configurations
 from s2and.extentions.featurization.featurizer import Featurizer
@@ -31,7 +32,9 @@ def main(cfg):
                 {
                     'signature1': sig1,
                     'signature2': sig2,
-                    'feature_vector': feature_vector,
+                    'feature_vector': [
+                        'NaN' if isnan(feature) else feature for feature in feature_vector
+                    ],
                     'distance': distance
                 }
             )
