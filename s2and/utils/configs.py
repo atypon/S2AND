@@ -2,7 +2,6 @@ import yaml
 
 
 class DotDict(dict):
-        
     # update, __setitem__ etc. omitted, but required if
     # one tries to set items using dot notation. Essentially
     # this is a read-only view.
@@ -26,7 +25,7 @@ class DotDict(dict):
     def get(self, k, default=None):
         if isinstance(k, str) and '.' in k:
             try:
-                    return self[k]
+                return self[k]
             except KeyError:
                 return default
             return super().get(k, default=default)

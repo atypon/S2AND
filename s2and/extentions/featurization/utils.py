@@ -1,102 +1,14 @@
-import torch
 import numpy as np
-from typing import Dict, List, Tuple, Callable
-from Levenshtein import distance
-from torch.nn import functional as F
+from typing import List, Tuple, Union, Dict
 from s2and.extentions.featurization.featurizer import Featurizer
+from s2and import logger
 
-
-def extract_feature(
-    sig1: Dict[str, dict], 
-    sig2: Dict[str, dict],
-    attribute : str
-) -> float:
-    """
-    Returns 1 if attribute is equal in sig1 and sig2 otherwise 0.
-    If attribute is missing, returns np.nan
-    """
-    if (sig1.get(attribute, None) is not None) and (sig2.get(attribute, None) is not None):
-        if sig1[attribute] == sig2[attribute]:
-            return 1
-        return 0
-    return np.nan
-
-def cosine_sim(
-    sig1: Dict[str, dict], 
-    sig2: Dict[str, dict]
-) -> float:
-    """
-    Computes cosine similarity of paperVector field of signature.
-    If field is missing, returns np.nan
-    """
-    v1 = sig1.get('vector', None)
-    v2 = sig2.get('vector', None)
-    if (v1 is not None) and (v2 is not None):
-        v1 = torch.Tensor(v1)
-        v2 = torch.Tensor(v2)
-        return F.cosine_similarity(v1, v2, dim=0).item()
-    return np.nan
-
-def name_distance(
-    sig1: Dict[str, dict],
-    sig2: Dict[str, dict]
-) -> float:
-    """
-    Computes levenshtein distance of s2AuthorName attribute.
-    If attribute is missing, return np.nan
-    """
-    v1 = sig1.get('OAname', None)
-    v2 = sig2.get('OAname', None)
-    if (v1 is not None) and (v2 is not None):
-        return distance(v1,v2)
-    return np.nan
-
-def jaccard(
-    sig1: Dict[str, dict], 
-    sig2: Dict[str, dict],
-    attribute: str
-) -> float:
-    """
-    Computes jaccard similarity of list attribute between two signatures.
-    If attribute is missing, returns np.nan
-    """
-    v1 = sig1.get(attribute, None)
-    v2 = sig2.get(attribute, None)
-    if (v1 is not None) and (v2 is not None):
-        v1 = set(v1)
-        v2 = set(v2)
-        if len(v1.union(v2)) > 0:
-            return len(v1.intersection(v2)) / len(v1.union(v2))
-        return 0
-    return np.nan
-
-def featurizing_function(
-    sig1: Dict[str, dict],
-    sig2: Dict[str, dict]
-) -> List[float]:
-    """
-    Calculates the feature vector of two given signature dicts
-    """
-    features = []
-    features.append(cosine_sim(sig1, sig2))
-    features.append(name_distance(sig1, sig2))
-    features.append(jaccard(sig1, sig2, 'affiliationsIds'))
-    features.append(jaccard(sig1, sig2, 'OAfos_0'))
-    features.append(jaccard(sig1, sig2, 'OAfos_1'))
-    features.append(jaccard(sig1, sig2, 'coAuthorShortNormNames'))
-
-    # Ids for later use from the ensemble
-    features.append(extract_feature(sig1, sig2, 'OAauthorId'))
-    features.append(extract_feature(sig1, sig2, 'S2authorId'))
-    features.append(extract_feature(sig1, sig2, 'orcid'))
-    return features
 
 def get_matrices(
-    datasets : List[str], 
-    featurizing_function : Callable, 
-    remove_nan : bool =True,
-    default_embeddings: bool = True,
-    external_emb_dir: str = None
+    datasets: List[str],
+    features: List[Dict[str, str]],
+    remove_nan: bool = True,
+    external_emb_dir: Union[str, None] = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     '''
     Featurize multiple datasets and return the combined matrix
@@ -106,11 +18,11 @@ def get_matrices(
     X_val, y_val = [], []
     X_test, y_test = [], []
     for dataset_name in datasets:
-        embeddings_path = f'{external_emb_dir}/{dataset_name}/{dataset_name}_embeddings.json'
-        featurizer = Featurizer(dataset_name=dataset_name, 
-                                featurizing_function=featurizing_function,
-                                default_embeddings=default_embeddings,
-                                embeddings_path=embeddings_path)
+        featurizer = Featurizer(
+            dataset_name=dataset_name,
+            features=features,
+            embeddings_dir=external_emb_dir
+        )
         X, y = featurizer.get_feature_matrix('train')
         X_train.append(X)
         y_train.append(y)
@@ -120,7 +32,7 @@ def get_matrices(
         X, y = featurizer.get_feature_matrix('test')
         X_test.append(X)
         y_test.append(y)
-        print(f'Processed {dataset_name}')
+        logger.info(f'Processed {dataset_name}')
 
     X_train = np.vstack(X_train)
     y_train = np.concatenate(y_train)
@@ -129,8 +41,11 @@ def get_matrices(
     X_test = np.vstack(X_test)
     y_test = np.concatenate(y_test)
     # Count nan per column for train set
-    print('Nan values for each feature :')
-    print(np.count_nonzero(np.isnan(X_train), axis=0))
+    nan_counts = {
+        f"{feature['operation']}({feature['field']})": count
+        for feature, count in zip(features, np.count_nonzero(np.isnan(X_train), axis=0))
+    }
+    logger.info(f'\nNan values for each feature :\n{nan_counts}')
     # Remove nan values
     if remove_nan:
         np.nan_to_num(X_train, copy=False)

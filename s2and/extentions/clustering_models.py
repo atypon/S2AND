@@ -1,47 +1,57 @@
-import json 
+import json
 import torch
 import numpy as np
 from collections import defaultdict
-from typing import Callable, Union, List, Dict
+from os.path import join
+from typing import Tuple, Any, Union, List, Dict
 from tqdm import tqdm
 from joblib import load
 from s2and.data import ANDData
 from sklearn.cluster import DBSCAN, AgglomerativeClustering
 from s2and.extentions.utils import load_signatures
+from s2and.extentions.featurization.operations import Registry
+
 
 class Clusterer():
     """
     Responsible for clustering the block_dict given as input
-    to predict method. 
+    to predict method.
     """
 
-    def __init__(self, 
-                combined_classifier : str,
-                dataset_name : str, 
-                featurization_function : Callable, 
-                default_embeddings: bool = True,
-                embeddings_path: Union[str, None] = None,
-                clusterer: str = 'dbscan') -> None:
+    def __init__(
+        self,
+        combined_classifier: str,
+        dataset_name: str,
+        features: List[Dict[str, str]],
+        embeddings_dir: Union[str, None] = None,
+        clusterer: str = 'dbscan'
+    ) -> None:
 
         self.signatures = load_signatures(dataset_name)
-        self.featurization_function = featurization_function
-        self.default_embeddings = default_embeddings
-        self.embeddings_path = embeddings_path
-        if not default_embeddings:
-            with open(embeddings_path) as f:
-                self.paper_ids_to_emb = json.load(f)
+        self.features = features
+        if embeddings_dir is not None:
+            self.embeddings_path = join(embeddings_dir, dataset_name,
+                                        f'{dataset_name}_embeddings.json')
+            with open(self.embeddings_path) as embeddings_file:
+                self.paper_ids_to_emb = json.load(embeddings_file)
+        else:
+            self.paper_ids_to_emb = None
 
         self.model = load(combined_classifier)
         self.clusterer_name = clusterer
 
-        if clusterer ==  'dbscan':
+        if clusterer == 'dbscan':
             self.clusterer = DBSCAN(eps=0.4, min_samples=1, metric='precomputed', n_jobs=-1)
         elif clusterer == 'agglomerative':
-            self.clusterer = AgglomerativeClustering(n_clusters=None, affinity='precomputed',
-                             distance_threshold=0.4, linkage='average')
+            self.clusterer = AgglomerativeClustering(
+                n_clusters=None,
+                affinity='precomputed',
+                distance_threshold=0.4,
+                linkage='average'
+            )
 
     @torch.inference_mode()
-    def get_distance_matrix(self, block : List[str]) -> np.ndarray:
+    def get_distance_matrix(self, block: List[str]) -> np.ndarray:
 
         n_signatures = len(block)
         d_matrix = np.zeros((n_signatures, n_signatures))
@@ -57,24 +67,24 @@ class Clusterer():
                     continue
                 # This is the same signature
                 if i == j:
-                    d_matrix[i,j] = 0
+                    d_matrix[i, j] = 0
                 # This is non the same signature
                 else:
                     if block[i] in self.signatures and block[j] in self.signatures:
                         sig1 = self.signatures[block[i]]
                         sig2 = self.signatures[block[j]]
-                        if not self.default_embeddings:
-                            # Replace default embedding 
+                        if self.paper_ids_to_emb is not None:
+                            # Replace default embedding
                             sig1['vector'] = self.paper_ids_to_emb[str(sig1['paper_id'])]
                             sig2['vector'] = self.paper_ids_to_emb[str(sig2['paper_id'])]
-                        features.append(self.featurization_function(sig1, sig2))
-                        mapper[feature_idx] = (i,j)
+                        features.append(self.__featurize_pair(signature_pair=(sig1, sig2)))
+                        mapper[feature_idx] = (i, j)
                         feature_idx += 1
                     # In case we have no info for any of the two signatures
                     # we set their distance to 1
                     else:
-                        d_matrix[i,j] = 1
-        
+                        d_matrix[i, j] = 1
+
         # Having featurized every sign combination, we calculate
         # distances in a batch-way to save time
         if len(features) > 0:
@@ -96,8 +106,8 @@ class Clusterer():
         return block_to_dmatrix
 
     def predict(
-        self, 
-        block_dict: Dict[str, List[str]], 
+        self,
+        block_dict: Dict[str, List[str]],
         block_to_dmatrix: Dict[str, np.ndarray] = None
     ) -> Dict[str, str]:
         """
@@ -111,24 +121,45 @@ class Clusterer():
             else:
                 dmatrix = block_to_dmatrix[block_name]
             # Resolve issue with dmatrix of 1 element in agglomerative clustering
-            if self.clusterer_name == 'agglomerative' and dmatrix.shape == (1,1):
-                clusters=[0]
+            if self.clusterer_name == 'agglomerative' and dmatrix.shape == (1, 1):
+                clusters = [0]
             else:
                 clusters = self.clusterer.fit_predict(dmatrix)
 
             max_identifier = max(clusters)
             for signature, cluster in zip(block, clusters):
-                
+
                 if cluster == -1:
                     max_identifier += 1
                     sign_to_pred_clusters[signature] = block_name + '_' + str(max_identifier)
                 else:
-                    sign_to_pred_clusters[signature] = block_name + '_' + str(cluster)  
+                    sign_to_pred_clusters[signature] = block_name + '_' + str(cluster)
         return sign_to_pred_clusters
+
+    def __featurize_pair(self, signature_pair: Tuple[Dict[str, Any]]) -> List[Union[int, float]]:
+        """
+        Returns complete feature vector for the given signature pair
+        :param signature_pair: pair of signatures to be featurized
+        :return: feature vector
+        """
+        feature_vector = []
+        for feature in self.features:
+            operation_name = feature['operation']
+            field = feature['field']
+            operation = Registry.get_operation(operation_name=operation_name)
+            if 'operation_args' in feature:
+                operation_args = feature['operation_args']
+                feature_vector.append(
+                    operation(signature_pair=signature_pair, field=field, **operation_args)
+                )
+            else:
+                feature_vector.append(operation(signature_pair=signature_pair, field=field))
+        return feature_vector
+
 
 class DummyClusterer():
     """
-    Dummy class used due to compatibilty issues with cluster_eval function 
+    Dummy class used due to compatibilty issues with cluster_eval function
     which is provided by S2AND. Must implement predict method that maps
     cluster names to their signatures
     """
@@ -142,16 +173,16 @@ class DummyClusterer():
                 self.sign_to_pred_cluster = json.load(f)
         else:
             self.sign_to_pred_cluster = source
-            
+
     def predict(
-        self, 
-        block_dict: Dict[str, List[str]], 
-        dataset: ANDData, 
+        self,
+        block_dict: Dict[str, List[str]],
+        dataset: ANDData,
         use_s2_clusters: bool
     ) -> Dict[str, List[str]]:
         """
         Creates dict that maps cluster name to the signatures it owns
-        """    
+        """
         pred_clusters = defaultdict(list)
         uknown_id = 0
         for signatures in block_dict.values():
@@ -162,4 +193,4 @@ class DummyClusterer():
                 else:
                     cluster = self.sign_to_pred_cluster[signature]
                     pred_clusters[cluster].append(signature)
-        return pred_clusters, None 
+        return pred_clusters, None

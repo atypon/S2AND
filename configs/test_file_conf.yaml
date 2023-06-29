@@ -1,9 +1,7 @@
-mlflow:
-  tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
-  experiment_name: AND-clustering
-  run_name: clusterer-new-datasets
-datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
-model_source: 'models/lightgbm.joblib'
+num_pairs: 100
+dataset: pubmed
+model_path: models/lightgbm.joblib
+result_path: results/unit_test.json
 features:
   - operation: cosine_similarity
     field: paperVector
@@ -23,4 +21,3 @@ features:
       normalization_field: coAuthorShortNormNames_old
   - operation: absolute_difference
     field: pubYear
-external_embeddings_dir: Null
