@@ -19,15 +19,20 @@ if __name__ == "__main__":
             dataset_name=dataset_name,
             features=cfg.features,
             embeddings_dir=cfg.external_embeddings_dir,
-            clusterer='dbscan'
+            clusterer=cfg.clusterer
         ) for dataset_name in cfg.datasets
     ]
 
     objective = Objective(dataset_names=cfg.datasets, datasets=datasets, clusterers=clusterers)
-    search_space = {
-        'eps': hp.uniform('eps', 0, 1),
-        'min_samples': scope.int(hp.quniform('min_samples', 1, 5, q=1))
-    }
+    if cfg.clusturer == 'agglomerative':
+        search_space = {
+            'distance_threshold': hp.uniform('distance_threshold', 0, 1),
+        }
+    elif cfg.clusterer == 'dbscan':
+        search_space = {
+            'eps': hp.uniform('eps', 0, 1),
+            'min_samples': scope.int(hp.quniform('min_samples', 1, 5, q=1))
+        }
     best = fmin(
         fn=objective,
         space=search_space,
@@ -43,6 +48,7 @@ if __name__ == "__main__":
         run_name=cfg.mlflow.run_name
     ):
         features = [f'{feature["operation"]}({feature["field"]})' for feature in cfg.features]
+        mlflow.log_param('clusterer', cfg.clusterer)
         mlflow.log_param('features', features)
         mlflow.log_params(best)
         objective.evaluate_best(best_params=best)

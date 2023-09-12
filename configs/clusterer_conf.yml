@@ -4,6 +4,7 @@ mlflow:
   run_name: clusterer-new-datasets
 datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
 model_source: 'models/lightgbm.joblib'
+clusterer: agglomerative
 features:
   - operation: cosine_similarity
     field: paperVector
