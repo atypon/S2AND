@@ -24,7 +24,7 @@ if __name__ == "__main__":
     ]
 
     objective = Objective(dataset_names=cfg.datasets, datasets=datasets, clusterers=clusterers)
-    if cfg.clusturer == 'agglomerative':
+    if cfg.clusterer == 'agglomerative':
         search_space = {
             'distance_threshold': hp.uniform('distance_threshold', 0, 1),
         }
