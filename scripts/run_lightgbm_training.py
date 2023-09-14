@@ -20,6 +20,7 @@ def run_lightgbm_experiment(
     X_test: np.ndarray,
     y_test: np.ndarray,
     features: List[Dict[str, str]],
+    categorical_features: List[int],
     results_folder: str,
     model_path: str,
     model_hyperparams: Dict[str, Union[str, float, int]],
@@ -30,7 +31,11 @@ def run_lightgbm_experiment(
     """
     mlflow.lightgbm.autolog()
     model = lgb.LGBMClassifier(**model_hyperparams)
-    model.fit(X_train, y_train)
+    model.fit(
+        X=X_train,
+        y=y_train,
+        categorical_feature=categorical_features
+    )
     train_report = classification_report(y_train, model.predict(X_train))
     test_report = classification_report(y_test, model.predict(X_test))
     logger.info(f'\nTrain set evaluation\n{train_report}')
@@ -77,6 +82,9 @@ if __name__ == "__main__":
     )
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
+    categorical_features = [
+        idx for idx, feature in enumerate(cfg.features) if feature['categorical']
+    ]
     with mlflow.start_run(
         experiment_id=experiment_id,
         tags={'datasets': str(cfg.data.datasets)},
@@ -88,6 +96,7 @@ if __name__ == "__main__":
             X_test=X_val,
             y_test=y_val,
             features=cfg.features,
+            categorical_features=categorical_features,
             results_folder=cfg.results.results_folder,
             model_path=cfg.results.model_path,
             model_hyperparams=cfg.model,

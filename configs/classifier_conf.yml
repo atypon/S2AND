@@ -9,7 +9,7 @@ model:
   n_jobs: 15
   metric: 'auc'
   random_state: 42
-  monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
+  #monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
   monotone_constraints_method: advanced
   lambda_l1: 0.6
   max_depth: 5
@@ -21,22 +21,30 @@ data:
 features:
   - operation: cosine_similarity
     field: paperVector
+    categorical: False
   - operation: levenshtein
     field: authorNormName
+    categorical: False
   - operation: jaccard_similarity
     field: affiliationIds
+    categorical: False
   - operation: jaccard_similarity
     field: coAuthorShortNormNames_old
+    categorical: False
   - operation: equality
     field: s2AuthorId
+    categorical: True
   - operation: equality
     field: orcId
+    categorical: True
   - operation: normalized_by_authors_absolute_difference
     field: authorPositionNo
     operation_args:
       normalization_field: coAuthorShortNormNames_old
+    categorical: False
   - operation: absolute_difference
     field: pubYear
+    categorical: False
 results:
   results_folder: 'results'
   model_path: 'models/lightgbm.joblib'
