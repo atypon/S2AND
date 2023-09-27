@@ -1,7 +1,7 @@
 mlflow:
-  tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
+  tracking_uri: https://mlflow-demo.atypon.com/
   experiment_name: 'AND-lightgbm-training'
-  run_name: 'overfitting-experiments'
+  run_name: 'model-retrain'
 model:
   objective: 'binary'
   tree_learner: 'data'

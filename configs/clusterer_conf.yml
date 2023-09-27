@@ -1,5 +1,5 @@
 mlflow:
-  tracking_uri: http://0.0.0.0:8000 #'https://mlflow-demo.atypon.com/'
+  tracking_uri: https://mlflow-demo.atypon.com/
   experiment_name: AND-clustering
   run_name: clusterer-new-datasets
 datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer'] # ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
