@@ -27,6 +27,7 @@ if __name__ == "__main__":
     if cfg.clusterer == 'agglomerative':
         search_space = {
             'distance_threshold': hp.uniform('distance_threshold', 0, 1),
+            'linkage': hp.choice('linkage', ['complete', 'average', 'single'])
         }
     elif cfg.clusterer == 'dbscan':
         search_space = {
@@ -39,6 +40,10 @@ if __name__ == "__main__":
         algo=tpe.suggest,
         max_evals=100
     )
+    # Fix linkage function as best returns index of bext linkage function, not the name
+    if cfg.clusterer == 'agglomerative':
+        best['linkage'] = ['complete', 'average', 'single'][best['linkage']]
+
     logger.info(f'\nBest parameters found after optimization : {best}')
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
