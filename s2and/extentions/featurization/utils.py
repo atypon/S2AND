@@ -9,10 +9,14 @@ def get_matrices(
     features: List[Dict[str, str]],
     remove_nan: bool = True,
     external_emb_dir: Union[str, None] = None
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
     '''
     Featurize multiple datasets and return the combined matrix
-    If no featurizing_function is given, the default will be used
+    :param datasets: list of s2and datasets to extract features from
+    :param features: feature list as appeared in the configurations files
+    :param remove_nan: whether to remove missing values or not
+    :param external_emb_dir: directory of external embeddings
+    :return: features matrices, label matrices X, y and missing values dict
     '''
     X_train, y_train = [], []
     X_val, y_val = [], []
@@ -41,14 +45,10 @@ def get_matrices(
     X_test = np.vstack(X_test)
     y_test = np.concatenate(y_test)
     # Count nan per column for train set
-    nan_counts = {
-        f"{feature['operation']}({feature['field']})": count
-        for feature, count in zip(features, np.count_nonzero(np.isnan(X_train), axis=0))
-    }
-    logger.info(f'\nNan values for each feature :\n{nan_counts}')
+    nan_counts = [count for count in np.count_nonzero(np.isnan(X_train), axis=0)]
     # Remove nan values
     if remove_nan:
         np.nan_to_num(X_train, copy=False)
         np.nan_to_num(X_test, copy=False)
         np.nan_to_num(X_val, copy=False)
-    return X_train, y_train, X_val, y_val, X_test, y_test
+    return X_train, y_train, X_val, y_val, X_test, y_test, nan_counts

@@ -67,12 +67,21 @@ class ANDPipeline():
         :param test_file_path: path to save test file
         """
         logger.info('Starting pairwise-classifier training...')
-        X_train, y_train, _, _, X_test, y_test = get_matrices(
+        X_train, y_train, _, _, X_test, y_test, nan_counts = get_matrices(
             datasets=datasets,
             features=self.features,
             remove_nan=False,
             external_emb_dir=self.external_embeddings_dir
         )
+        # Log missing counts and raise error if complete feature is missing
+        logger.info(f'\nNan values for each feature:\n')
+        for feature, feature_name, nan_count in zip(self.features, self.feature_names, nan_counts):
+            logger.info(f'{feature_name}: {nan_count}')
+            mlflow.log_param(f"missing-{feature_name.replace('(', ' ').replace(')', ' ')}", nan_count)
+            if nan_count == X_train.shape[0]:
+                raise ValueError(
+                    f'Feature {feature_name} is completely missing, check whether argumement is correct'
+                )
 
         # Fit the classifier
         mlflow.lightgbm.autolog()
@@ -191,7 +200,7 @@ class ANDPipeline():
         mlflow.log_params(best)
         for dataset, results in metrics.items():
             logger.info(f'\n{dataset}')
-            logger.info(f'\n{metrics}')
+            logger.info(f'\n{results}')
             mlflow.log_metric(f'{dataset} B3 P', results['B3 (P, R, F1)'][0])
             mlflow.log_metric(f'{dataset} B3 R', results['B3 (P, R, F1)'][1])
             mlflow.log_metric(f'{dataset} B3 F1', results['B3 (P, R, F1)'][2])
