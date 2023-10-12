@@ -1,5 +1,7 @@
-import numpy as np
 from typing import List, Tuple, Union, Dict
+
+import numpy as np
+
 from s2and.extentions.featurization.featurizer import Featurizer
 from s2and import logger
 
