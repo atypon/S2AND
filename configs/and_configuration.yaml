@@ -1,22 +1,4 @@
-mlflow:
-  tracking_uri: https://mlflow-demo.atypon.com/
-  experiment_name: 'AND-lightgbm-training'
-  run_name: 'model-retrain'
-model:
-  objective: 'binary'
-  tree_learner: 'data'
-  verbosity: -1
-  n_jobs: 15
-  metric: 'auc'
-  random_state: 42
-  #monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
-  monotone_constraints_method: advanced
-  lambda_l1: 0.6
-  max_depth: 5
-  num_leaves: 8
-  max_bin: 128
 data:
-  datasets: ['aminer', 'pubmed', 'zbmath', 'kisti', 'arnetminer']
   external_embeddings_dir: Null
 features:
   - operation: cosine_similarity
@@ -35,6 +17,9 @@ features:
     field: s2AuthorId
     categorical: True
   - operation: equality
+    field: oaAuthorId
+    categorical: True
+  - operation: equality
     field: orcId
     categorical: True
   - operation: normalized_by_authors_absolute_difference
@@ -45,6 +30,32 @@ features:
   - operation: absolute_difference
     field: pubYear
     categorical: False
-results:
-  results_folder: 'results'
-  model_path: 'models/lightgbm.joblib'
+pairwise_model:
+  datasets: [pubmed]
+  hyperparams:
+    objective: binary
+    tree_learner: data
+    verbosity: -1
+    n_jobs: 15
+    metric: auc
+    random_state: 42
+    #monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
+    monotone_constraints_method: advanced
+    lambda_l1: 0.6
+    max_depth: 5
+    num_leaves: 8
+    max_bin: 128
+  path: models/lightgbm.joblib
+  onnx_path: models/lightgbm.onnx
+  unit_test:
+    num_pairs: 100
+    dataset: pubmed
+    test_file_path: results/unit_test.json
+clustering:
+  datasets: [pubmed]
+  algorithm: agglomerative
+results_dir: results/
+mlflow:
+  tracking_uri: https://mlflow-demo.atypon.com/
+  experiment_name: AND-complete-pipeline
+  run_name: model-retraining
