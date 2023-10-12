@@ -1,10 +1,12 @@
+from typing import Any, Dict, Tuple
+
+from Levenshtein import distance as levenshtein_distance
 import numpy as np
 import torch
-from typing import Any, Dict, Tuple
 from torch.nn import functional as F
-from Levenshtein import distance as levenshtein_distance
-from s2and.extentions.featurization.operations_registry import Registry
+
 from s2and.extentions.featurization.base_operation import BaseOperation
+from s2and.extentions.featurization.operations_registry import Registry
 
 
 @Registry.register_operation(operation_name='equality')
