@@ -11,7 +11,7 @@ features:
     field: affiliationIds
     categorical: False
   - operation: jaccard_similarity
-    field: coAuthorShortNormNames_old
+    field: coAuthorShortNormNames
     categorical: False
   - operation: equality
     field: s2AuthorId
@@ -25,7 +25,7 @@ features:
   - operation: normalized_by_authors_absolute_difference
     field: authorPositionNo
     operation_args:
-      normalization_field: coAuthorShortNormNames_old
+      normalization_field: coAuthorShortNormNames
     categorical: False
   - operation: absolute_difference
     field: pubYear
