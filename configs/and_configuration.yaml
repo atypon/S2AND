@@ -31,7 +31,7 @@ features:
     field: pubYear
     categorical: False
 pairwise_model:
-  datasets: [pubmed]
+  datasets: [aminer, pubmed, zbmath, kisti, arnetminer]
   hyperparams:
     objective: binary
     tree_learner: data
@@ -52,7 +52,7 @@ pairwise_model:
     dataset: pubmed
     test_file_path: results/unit_test.json
 clustering:
-  datasets: [pubmed]
+  datasets: [aminer, pubmed, zbmath, kisti, arnetminer]
   algorithm: agglomerative
 results_dir: results/
 mlflow:
