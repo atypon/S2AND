@@ -43,6 +43,8 @@ class JaccardSimilarity(BaseOperation):
         val1, val2 = values
         val1 = set(val1)
         val2 = set(val2)
+        if len(val1) == 0 or len(val2) == 0:
+            return np.nan
         if len(val1.union(val2)) > 0:
             return len(val1.intersection(val2)) / len(val1.union(val2))
         return 0
