@@ -53,4 +53,4 @@ class ONNXConverter():
         y_onnx = sess.run(None, {"input": dataset.astype(np.float32)})
         y_onnx = np.asarray([pred[0] for pred in y_onnx[1]])
         y_target = self.model.predict_proba(dataset)[:, 0]
-        np.testing.assert_array_almost_equal(y_target, y_onnx, decimal=3)
+        np.testing.assert_array_almost_equal(y_target, y_onnx, decimal=5)

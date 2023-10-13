@@ -79,7 +79,7 @@ class AbsoluteDifference(BaseOperation):
 
 
 @Registry.register_operation(operation_name='normalized_by_authors_absolute_difference')
-class NormalizedByAUthorsAbsoluteDifference(BaseOperation):
+class NormalizedByAuthorsAbsoluteDifference(BaseOperation):
     """
     Subclass implementing normalized absolute difference
     """
@@ -105,6 +105,9 @@ class NormalizedByAUthorsAbsoluteDifference(BaseOperation):
             return np.nan
         norm_factor_1 = len(norm_factor_1)
         norm_factor_2 = len(norm_factor_2)
+        # Take into account zero devision
+        if norm_factor_1==0 or norm_factor_2==0:
+            return np.nan
         return self.calculate(values=(value1, value2), factors=(norm_factor_1, norm_factor_2))
 
     def calculate(self, values: Tuple[Any], factors: Tuple[int, int]) -> float:
@@ -117,4 +120,32 @@ class NormalizedByAUthorsAbsoluteDifference(BaseOperation):
         # Convert possible int or str to float
         val1 = float(val1) / factor1
         val2 = float(val2) / factor2
-        return abs(val1 - val2)
+        # Add small ammount of noise to avoid ONNX convertion error with 0.06666667 value
+        return abs(val1 - val2) + np.random.normal(loc=0, scale=0.0001)
+
+
+@Registry.register_operation(operation_name='random_noise')
+class RandomNoise(BaseOperation):
+    """
+    Subclass for implementing random noise feature
+    """
+
+    def __call__(
+        self,
+        signature_pair: Tuple[Dict[str, Any], Dict[str, Any]],
+        field: str,
+    ) -> float:
+        """
+        Performs the operation with proper checking
+        :param signature_pair: pair of signatures to be featurized
+        :param field: field of signatures for featurization
+        :return: calculated value
+        """
+        return self.calculate()
+
+    def calculate(self) -> float:
+        """
+        Takes input the normalized values by nummber of
+        coauthors and performs the calculation
+        """
+        return np.random.normal(loc=0, scale=0.5)
