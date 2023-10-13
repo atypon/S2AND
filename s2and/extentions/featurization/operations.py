@@ -120,8 +120,7 @@ class NormalizedByAuthorsAbsoluteDifference(BaseOperation):
         # Convert possible int or str to float
         val1 = float(val1) / factor1
         val2 = float(val2) / factor2
-        # Add small ammount of noise to avoid ONNX convertion error with 0.06666667 value
-        return abs(val1 - val2) + np.random.normal(loc=0, scale=0.0001)
+        return abs(val1 - val2)
 
 
 @Registry.register_operation(operation_name='random_noise')
