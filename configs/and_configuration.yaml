@@ -16,9 +16,11 @@ features:
   - operation: equality
     field: s2AuthorId
     categorical: True
+    introduce_nan: 0.15
   - operation: equality
     field: oaAuthorId
     categorical: True
+    introduce_nan: 0.15
   - operation: equality
     field: orcId
     categorical: True
@@ -58,4 +60,4 @@ results_dir: results/
 mlflow:
   tracking_uri: https://mlflow-demo.atypon.com/
   experiment_name: AND-complete-pipeline
-  run_name: model-retraining
+  run_name: offline-disambiguation

@@ -6,6 +6,7 @@ import joblib
 import lightgbm as lgb
 import matplotlib.pyplot as plt
 import mlflow
+import numpy as np
 from sklearn.metrics import classification_report, f1_score
 
 from s2and import logger
@@ -67,20 +68,24 @@ class ANDPipeline():
         :param test_file_path: path to save test file
         """
         logger.info('Starting pairwise-classifier training...')
-        X_train, y_train, _, _, X_test, y_test, nan_counts = get_matrices(
+        X_train, y_train, _, _, X_test, y_test = get_matrices(
             datasets=datasets,
             features=self.features,
             remove_nan=False,
             external_emb_dir=self.external_embeddings_dir
         )
-        # Log missing counts and raise error if complete feature is missing
-        logger.info(f'\nNan values for each feature:\n')
-        for feature, feature_name, nan_count in zip(self.features, self.feature_names, nan_counts):
-            logger.info(f'{feature_name}: {nan_count}')
-            mlflow.log_param(f"missing-{feature_name.replace('(', ' ').replace(')', ' ')}", nan_count)
-            if nan_count == X_train.shape[0]:
-                raise ValueError(
-                    f'Feature {feature_name} is completely missing, check whether argumement is correct'
+        # Count and log missing features and raise error if complete feature is missing
+        self.__log_nan_features(X=X_train)
+
+        # Introduce nans to improve nan handling of lightgbm
+        X_train = self.__introduce_nans(X=X_train)
+
+        # Log introduced nan percentages
+        for feature_info in self.features:
+            if 'introduce_nan' in feature_info:
+                mlflow.log_param(
+                    f"introduced_nan-{feature_info['operation']} {feature_info['field']}",
+                    feature_info['introduce_nan']
                 )
 
         # Fit the classifier
@@ -93,37 +98,17 @@ class ANDPipeline():
         )
 
         # Save results and reports
-        train_report = classification_report(y_train, model.predict(X_train))
-        test_report = classification_report(y_test, model.predict(X_test))
-        logger.info(f'\nTrain set evaluation\n{train_report}')
-        logger.info(f'\nTest set evaluation\n{test_report}')
-        with open(join(self.results_dir, 'train_report.txt'), 'w') as f:
-            f.write(train_report)
-        with open(join(self.results_dir, 'test_report.txt'), 'w') as f:
-            f.write(test_report)
         mlflow.log_param('classifier-datasets', datasets)
-        mlflow.log_metric('f1-macro', f1_score(y_test, model.predict(X_test), average='macro'))
-        mlflow.log_artifact(join(self.results_dir, 'train_report.txt'))
-        mlflow.log_artifact(join(self.results_dir, 'test_report.txt'))
-        pairwise_eval(
-            X=X_test,
-            y=y_test,
-            classifier=model,
-            figs_path=self.results_dir,
-            title='classifier',
-            shap_feature_names=self.feature_names
+        self.__evaluate_classifier(
+            X_train=X_train,
+            y_train=y_train,
+            X_test=X_test,
+            y_test=y_test,
+            model=model
         )
-        mlflow.log_artifact(join(self.results_dir, 'classifier_pr.png'))
-        mlflow.log_artifact(join(self.results_dir, 'classifier_roc.png'))
-        mlflow.log_artifact(join(self.results_dir, 'classifier_shap.png'))
-        mlflow.log_param('features', self.feature_names)
         
         # Plot the first 5 trees of lightgbm
-        for tree_index in range(min(5, len(model.booster_.dump_model()['tree_info']))):
-            plt.figure()
-            lgb.plot_tree(model, tree_index=tree_index, show_info=['data_percentage'])
-            plt.savefig(join(self.results_dir, f'model-tree-{tree_index}.png'), dpi=750)
-            mlflow.log_artifact(join(self.results_dir, f'model-tree-{tree_index}.png'))
+        self.__plot_lightgbm_trees(model=model)
 
         # Save model as LightGBM wrapper that implements predict_distance method
         model = LightGBMWrapper(model)
@@ -204,3 +189,88 @@ class ANDPipeline():
             mlflow.log_metric(f'{dataset} B3 P', results['B3 (P, R, F1)'][0])
             mlflow.log_metric(f'{dataset} B3 R', results['B3 (P, R, F1)'][1])
             mlflow.log_metric(f'{dataset} B3 F1', results['B3 (P, R, F1)'][2])
+
+    def __plot_lightgbm_trees(self, model: lgb.LGBMClassifier) -> None:
+        """
+        Plots first 5 trees of the lightgbm classifier
+        :param model: the trained lightgbm classifier
+        """
+        for tree_index in range(min(5, len(model.booster_.dump_model()['tree_info']))):
+            plt.figure()
+            lgb.plot_tree(model, tree_index=tree_index, show_info=['data_percentage'])
+            plt.savefig(join(self.results_dir, f'model-tree-{tree_index}.png'), dpi=750)
+            mlflow.log_artifact(join(self.results_dir, f'model-tree-{tree_index}.png'))
+    
+    def __log_nan_features(self, X: np.ndarray) -> None:
+        """
+        Log number of missing features
+        :param X: the feature matrix to count missing values from
+        """
+        # Count nan per column for given feature matrix
+        nan_counts = [count for count in np.count_nonzero(np.isnan(X), axis=0)]
+        logger.info(f'\nNan values for each feature:\n')
+        for feature_name, nan_count in zip(self.feature_names, nan_counts):
+            logger.info(f'{feature_name}: {nan_count}')
+            mlflow.log_param(f"missing-{feature_name.replace('(', ' ').replace(')', ' ')}", nan_count)
+            if nan_count == X.shape[0]:
+                raise ValueError(
+                    f'Feature {feature_name} is completely missing, check whether argumement is correct'
+                )
+            
+    def __introduce_nans(self, X: np.ndarray) -> np.ndarray:
+        """
+        Given a feature matrix, introduce nan values to each feature
+        :param X: feature matrix
+        :return: new feature matrix with introduced nans
+        """
+        # Count nan per column for given feature matrix
+        nan_counts = [count for count in np.count_nonzero(np.isnan(X), axis=0)]
+        for feature_index, (feature_data, nan_count) in enumerate(zip(self.features, nan_counts)):
+            if 'introduce_nan' in feature_data and nan_count < feature_data['introduce_nan']*X.shape[0]:
+                # How many nans left to achieve desired nan percentage
+                nans_to_go = int(feature_data['introduce_nan']*X.shape[0]) - nan_count
+                # Fill randomly non nan values with nans
+                valid_indices = np.argwhere(~np.isnan(X[:, feature_index])).squeeze()
+                valid_indices = np.random.choice(valid_indices, replace=False, size=nans_to_go)
+                X[valid_indices, feature_index] = np.nan
+        return X
+
+    def __evaluate_classifier(
+        self,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
+        model: lgb.LGBMClassifier
+    ) -> None:
+        """
+        Evaluate model and log results on mlflow
+        :param X_train: train feature matrix
+        :param y_train: train labels
+        :param X_test: test feature matrix
+        :param y_test: test labels
+        :param model: trained lightgbm classifier
+        """
+        train_report = classification_report(y_train, model.predict(X_train))
+        test_report = classification_report(y_test, model.predict(X_test))
+        logger.info(f'\nTrain set evaluation\n{train_report}')
+        logger.info(f'\nTest set evaluation\n{test_report}')
+        with open(join(self.results_dir, 'train_report.txt'), 'w') as f:
+            f.write(train_report)
+        with open(join(self.results_dir, 'test_report.txt'), 'w') as f:
+            f.write(test_report)
+        mlflow.log_metric('f1-macro', f1_score(y_test, model.predict(X_test), average='macro'))
+        mlflow.log_artifact(join(self.results_dir, 'train_report.txt'))
+        mlflow.log_artifact(join(self.results_dir, 'test_report.txt'))
+        pairwise_eval(
+            X=X_test,
+            y=y_test,
+            classifier=model,
+            figs_path=self.results_dir,
+            title='classifier',
+            shap_feature_names=self.feature_names
+        )
+        mlflow.log_artifact(join(self.results_dir, 'classifier_pr.png'))
+        mlflow.log_artifact(join(self.results_dir, 'classifier_roc.png'))
+        mlflow.log_artifact(join(self.results_dir, 'classifier_shap.png'))
+        mlflow.log_param('features', self.feature_names)
