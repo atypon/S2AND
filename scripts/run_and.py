@@ -9,9 +9,23 @@ from s2and.utils.mlflow import get_or_create_experiment
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-config-file', help='path to configuration file', default='configs/and_configuration.yaml')
-    parser.add_argument('--classification-step', help='run classification step', action='store_true', default=False)
-    parser.add_argument('--clustering-step', help='run clustering step', action='store_true', default=False)
+    parser.add_argument(
+        '-config-file',
+        help='path to configuration file',
+        default='configs/and_configuration.yaml'
+    )
+    parser.add_argument(
+        '--classification-step',
+        help='run classification step',
+        action='store_true',
+        default=False
+    )
+    parser.add_argument(
+        '--clustering-step',
+        help='run clustering step',
+        action='store_true',
+        default=False
+    )
     args = parser.parse_args()
 
     cfg = load_configurations(path=args.config_file)
