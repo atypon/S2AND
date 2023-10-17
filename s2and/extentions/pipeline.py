@@ -74,7 +74,8 @@ class ANDPipeline():
             remove_nan=False,
             external_emb_dir=self.external_embeddings_dir
         )
-        # Count and log missing features and raise error if complete feature is missing
+        # Count and log missing features and raise error if complete feature
+        # is missing
         self.__log_nan_features(X=X_train)
 
         # Introduce nans to improve nan handling of lightgbm
@@ -106,11 +107,12 @@ class ANDPipeline():
             y_test=y_test,
             model=model
         )
-        
+
         # Plot the first 5 trees of lightgbm
         self.__plot_lightgbm_trees(model=model)
 
-        # Save model as LightGBM wrapper that implements predict_distance method
+        # Save model as LightGBM wrapper that implements
+        # predict_distance method
         model = LightGBMWrapper(model)
         joblib.dump(model, self.pairwise_model_path)
         mlflow.log_artifact(self.pairwise_model_path)
@@ -151,7 +153,9 @@ class ANDPipeline():
         :param clusterer: clusterer to be used either dbscan or agglomerative
         """
         logger.info('Starting clustering optimization...')
-        loaded_datasets = [load_dataset(dataset_name) for dataset_name in datasets]
+        loaded_datasets = [
+            load_dataset(dataset_name) for dataset_name in datasets
+        ]
         clusterers = [
             Clusterer(
                 combined_classifier=self.pairwise_model_path,
@@ -161,8 +165,12 @@ class ANDPipeline():
                 clusterer=clusterer
             ) for dataset_name in datasets
         ]
-        
-        objective = Objective(dataset_names=datasets, datasets=loaded_datasets, clusterers=clusterers)
+
+        objective = Objective(
+            dataset_names=datasets,
+            datasets=loaded_datasets,
+            clusterers=clusterers
+        )
         search_space = objective.get_search_space(clusterer)
         # Run minimization with hyperopt to received best set of hyperparams
         best = fmin(
@@ -171,12 +179,15 @@ class ANDPipeline():
             algo=tpe.suggest,
             max_evals=100
         )
-        
-        # Fix linkage function as best returns index of bext linkage function, not the name
+
+        # Fix linkage function as best returns index of bext linkage function,
+        # not the name
         if clusterer == 'agglomerative':
-            best['linkage'] = ['complete', 'average', 'single'][best['linkage']]
+            best['linkage'] = [
+                'complete', 'average', 'single'
+            ][best['linkage']]
         logger.info(f'\nBest parameters found after optimization : {best}')
-        
+
         # Evaluate with optimal hyperparams and log results
         metrics = objective.evaluate_best(best_params=best)
         mlflow.log_param('clusterer', clusterer)
@@ -200,7 +211,7 @@ class ANDPipeline():
             lgb.plot_tree(model, tree_index=tree_index, show_info=['data_percentage'])
             plt.savefig(join(self.results_dir, f'model-tree-{tree_index}.png'), dpi=750)
             mlflow.log_artifact(join(self.results_dir, f'model-tree-{tree_index}.png'))
-    
+
     def __log_nan_features(self, X: np.ndarray) -> None:
         """
         Log number of missing features
@@ -208,15 +219,19 @@ class ANDPipeline():
         """
         # Count nan per column for given feature matrix
         nan_counts = [count for count in np.count_nonzero(np.isnan(X), axis=0)]
-        logger.info(f'\nNan values for each feature:\n')
+        logger.info('\nNan values for each feature:\n')
         for feature_name, nan_count in zip(self.feature_names, nan_counts):
             logger.info(f'{feature_name}: {nan_count}')
-            mlflow.log_param(f"missing-{feature_name.replace('(', ' ').replace(')', ' ')}", nan_count)
+            mlflow.log_param(
+                f"missing-{feature_name.replace('(', ' ').replace(')', ' ')}",
+                nan_count
+            )
             if nan_count == X.shape[0]:
                 raise ValueError(
-                    f'Feature {feature_name} is completely missing, check whether argumement is correct'
+                    f'Feature {feature_name} is completely missing, check whether argumement \
+                        is correct'
                 )
-            
+
     def __introduce_nans(self, X: np.ndarray) -> np.ndarray:
         """
         Given a feature matrix, introduce nan values to each feature
@@ -226,7 +241,8 @@ class ANDPipeline():
         # Count nan per column for given feature matrix
         nan_counts = [count for count in np.count_nonzero(np.isnan(X), axis=0)]
         for feature_index, (feature_data, nan_count) in enumerate(zip(self.features, nan_counts)):
-            if 'introduce_nan' in feature_data and nan_count < feature_data['introduce_nan']*X.shape[0]:
+            if 'introduce_nan' in feature_data and \
+                    nan_count < feature_data['introduce_nan']*X.shape[0]:
                 # How many nans left to achieve desired nan percentage
                 nans_to_go = int(feature_data['introduce_nan']*X.shape[0]) - nan_count
                 # Fill randomly non nan values with nans
