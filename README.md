@@ -28,7 +28,7 @@ Note that this software package comes with tools specifically designed to access
 
 For the data extended with PKG's info space, run the following command :
 
-`gsutil -m cp -r gs://pkg-datasets/datasets/S2AND extended_data/`
+`gsutil -m cp -r gs://pkg-datasets/datasets/S2AND/extended_data/ extended_data/`
 
 ## Configuration
 Modify the config file at `data/path_config.json`. This file should look like this
