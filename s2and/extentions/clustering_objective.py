@@ -88,7 +88,7 @@ class Objective():
             metrics, _ = cluster_eval(dataset, dummy_clusterer, split='test')
             results_per_dataset[dataset_name] = metrics
         return results_per_dataset
-    
+
     @staticmethod
     def get_search_space(clusterer: str) -> Dict[str, Any]:
         """
