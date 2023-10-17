@@ -7,6 +7,9 @@ features:
   - operation: levenshtein
     field: authorNormName
     categorical: False
+  - operation: jarowinkler
+    field: authorNormName
+    categorical: False
   - operation: jaccard_similarity
     field: affiliationIds
     categorical: False
