@@ -25,7 +25,7 @@ if __name__ == "__main__":
         getOrCreate()
 
     df = spark.read. \
-        json('extended_data/trainingSignaturesJson2.json')
+        json('extended_data/trainingSignaturesJson4.json')
 
     df.printSchema()
     with open('extended_data/schema.json', 'w') as f:

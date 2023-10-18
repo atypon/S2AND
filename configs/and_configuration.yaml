@@ -10,11 +10,17 @@ features:
   - operation: jarowinkler
     field: authorNormName
     categorical: False
+  - operation: levenshtein
+    field: authorNormFirstName
+    categorical: False
+  - operation: jarowinkler
+    field: authorNormFirstName
+    categorical: False
   - operation: jaccard_similarity
     field: affiliationIds
     categorical: False
   - operation: jaccard_similarity
-    field: coAuthorShortNormNames
+    field: oaCoAuthorShortNormNames
     categorical: False
   - operation: equality
     field: s2AuthorId
@@ -30,7 +36,7 @@ features:
   - operation: normalized_by_authors_absolute_difference
     field: authorPositionNo
     operation_args:
-      normalization_field: coAuthorShortNormNames
+      normalization_field: oaCoAuthorShortNormNames
     categorical: False
   - operation: absolute_difference
     field: pubYear
