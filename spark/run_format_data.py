@@ -25,7 +25,7 @@ if __name__ == "__main__":
         getOrCreate()
 
     df = spark.read. \
-        json('extended_data/trainingSignaturesJson7.json')
+        json('extended_data/trainingSignaturesJson4.json')
 
     df.printSchema()
     with open('extended_data/schema.json', 'w') as f:
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
         df_subdataset.coalesce(1).write. \
             mode('overwrite'). \
-            json(f'latest_extensions/{dataset}')
+            json(f'extended_data/{dataset}')
 
         with open(f'data/{dataset}/{dataset}_signatures.json') as f:
             data = json.load(f)

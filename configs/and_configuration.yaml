@@ -1,0 +1,72 @@
+data:
+  external_embeddings_dir: Null
+features:
+  - operation: cosine_similarity
+    field: paperVector
+    categorical: False
+  - operation: levenshtein
+    field: authorNormName
+    categorical: False
+  - operation: jarowinkler
+    field: authorNormName
+    categorical: False
+  - operation: levenshtein
+    field: authorNormFirstName
+    categorical: False
+  - operation: jarowinkler
+    field: authorNormFirstName
+    categorical: False
+  - operation: jaccard_similarity
+    field: affiliationIds
+    categorical: False
+  - operation: jaccard_similarity
+    field: oaCoAuthorShortNormNames
+    categorical: False
+  - operation: equality
+    field: s2AuthorId
+    categorical: True
+    introduce_nan: 0.15
+  - operation: equality
+    field: oaAuthorId
+    categorical: True
+    introduce_nan: 0.15
+  - operation: equality
+    field: orcId
+    categorical: True
+  - operation: normalized_by_authors_absolute_difference
+    field: authorPositionNo
+    operation_args:
+      normalization_field: oaCoAuthorShortNormNames
+    categorical: False
+  - operation: absolute_difference
+    field: pubYear
+    categorical: False
+pairwise_model:
+  datasets: [aminer, pubmed, zbmath, kisti, arnetminer]
+  hyperparams:
+    objective: binary
+    tree_learner: data
+    verbosity: -1
+    n_jobs: 15
+    metric: auc
+    random_state: 42
+    #monotone_constraints: [0, 0, 0, 0, 0, 1, 0, 0]
+    monotone_constraints_method: advanced
+    lambda_l1: 0.6
+    max_depth: 5
+    num_leaves: 8
+    max_bin: 128
+  path: models/lightgbm.joblib
+  onnx_path: models/lightgbm.onnx
+  unit_test:
+    num_pairs: 100
+    dataset: pubmed
+    test_file_path: results/unit_test.json
+clustering:
+  datasets: [aminer, pubmed, zbmath, kisti, arnetminer]
+  algorithm: agglomerative
+results_dir: results/
+mlflow:
+  tracking_uri: https://mlflow-demo.atypon.com/
+  experiment_name: AND-complete-pipeline
+  run_name: offline-disambiguation

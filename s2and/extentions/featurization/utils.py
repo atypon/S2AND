@@ -1,7 +1,9 @@
-import numpy as np
 from typing import List, Tuple, Union, Dict
-from s2and.extentions.featurization.featurizer import Featurizer
+
+import numpy as np
+
 from s2and import logger
+from s2and.extentions.featurization.featurizer import Featurizer
 
 
 def get_matrices(
@@ -12,7 +14,11 @@ def get_matrices(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     '''
     Featurize multiple datasets and return the combined matrix
-    If no featurizing_function is given, the default will be used
+    :param datasets: list of s2and datasets to extract features from
+    :param features: feature list as appeared in the configurations files
+    :param remove_nan: whether to remove missing values or not
+    :param external_emb_dir: directory of external embeddings
+    :return: features matrices, label matrices X, y
     '''
     X_train, y_train = [], []
     X_val, y_val = [], []
@@ -40,12 +46,6 @@ def get_matrices(
     y_val = np.concatenate(y_val)
     X_test = np.vstack(X_test)
     y_test = np.concatenate(y_test)
-    # Count nan per column for train set
-    nan_counts = {
-        f"{feature['operation']}({feature['field']})": count
-        for feature, count in zip(features, np.count_nonzero(np.isnan(X_train), axis=0))
-    }
-    logger.info(f'\nNan values for each feature :\n{nan_counts}')
     # Remove nan values
     if remove_nan:
         np.nan_to_num(X_train, copy=False)

@@ -1,6 +1,7 @@
-import numpy as np
 from abc import abstractmethod
 from typing import Any, Dict, Tuple, Union
+
+import numpy as np
 
 
 class BaseOperation():
