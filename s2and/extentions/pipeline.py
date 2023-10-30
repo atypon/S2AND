@@ -180,12 +180,10 @@ class ANDPipeline():
             max_evals=100
         )
 
-        # Fix linkage function as best returns index of bext linkage function,
-        # not the name
+        # Set linkage function to average for agglomerative clustering
+        # so that it is properly logged as parameter
         if clusterer == 'agglomerative':
-            best['linkage'] = [
-                'complete', 'average', 'single'
-            ][best['linkage']]
+            best['linkage'] = 'average'
         logger.info(f'\nBest parameters found after optimization : {best}')
 
         # Evaluate with optimal hyperparams and log results
