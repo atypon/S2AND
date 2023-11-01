@@ -97,7 +97,6 @@ class Objective():
         if clusterer == 'agglomerative':
             search_space = {
                 'distance_threshold': hp.uniform('distance_threshold', 0, 1),
-                'linkage': hp.choice('linkage', ['complete', 'average', 'single'])
             }
         elif clusterer == 'dbscan':
             search_space = {
