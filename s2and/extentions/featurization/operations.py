@@ -151,8 +151,7 @@ class RandomNoise(BaseOperation):
 
     def calculate(self) -> float:
         """
-        Takes input the normalized values by nummber of
-        coauthors and performs the calculation
+        Return random noise
         """
         return np.random.normal(loc=0, scale=0.5)
 
@@ -163,7 +162,36 @@ class JaroWinkler(BaseOperation):
     Subclass implementing Jaro Winkler similarity
     """
 
-    def calculate(self, values) -> float:
+    def calculate(self, values: Tuple[str, str]) -> float:
+        """
+        Performs the calculation of the jarowinkler similarity
+        :param values: tuple of values to be featurized
+        :return: calculated value
+        """
         self._check_type(values, str)
         val1, val2 = values
+        return jarowinkler_similarity(val1, val2)
+
+
+@Registry.register_operation(operation_name='jarowinkler_no_surname')
+class JaroWinklerNoSurname(BaseOperation):
+    """
+    Subclass implementing Jaro Winkler similarity for full name field.
+    This means that by default it subtracts the surname since it is always
+    the same inside a block
+    """
+
+    def calculate(self, values: Tuple[str, str]) -> float:
+        """
+        Performs the calculation of the jarowinkler similarity
+        after removing surname
+        :param values: tuple of values to be featurized
+        :return: calculated value
+        """
+        self._check_type(values, str)
+        val1, val2 = values
+        # Surname can be obtained from either val1 or val2
+        surname = val1.split(' ')[-1]
+        val1 = val1.replace(' ' + surname, '')
+        val2 = val2.replace(' ' + surname, '')
         return jarowinkler_similarity(val1, val2)

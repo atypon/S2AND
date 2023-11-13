@@ -4,17 +4,8 @@ features:
   - operation: cosine_similarity
     field: paperVector
     categorical: False
-  - operation: levenshtein
+  - operation: jarowinkler_no_surname
     field: authorNormName
-    categorical: False
-  - operation: jarowinkler
-    field: authorNormName
-    categorical: False
-  - operation: levenshtein
-    field: authorNormFirstName
-    categorical: False
-  - operation: jarowinkler
-    field: authorNormFirstName
     categorical: False
   - operation: jaccard_similarity
     field: affiliationIds
