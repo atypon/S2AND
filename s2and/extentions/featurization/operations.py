@@ -194,4 +194,6 @@ class JaroWinklerNoSurname(BaseOperation):
         surname = val1.split(' ')[-1]
         val1 = val1.replace(' ' + surname, '')
         val2 = val2.replace(' ' + surname, '')
+        if len(val1) == 1 or len(val2) == 1:
+            return np.nan
         return jarowinkler_similarity(val1, val2)
