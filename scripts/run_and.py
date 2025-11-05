@@ -43,6 +43,7 @@ if __name__ == "__main__":
         experiment_id=experiment_id,
         run_name=cfg.mlflow.run_name
     ):
+        mlflow.log_artifact(local_path='configs/and_configuration.yaml')
         if args.classification_step:
             and_pipeline.train_pairwise_classifier(
                 datasets=cfg.pairwise_model.datasets,
