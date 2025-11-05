@@ -1,9 +1,9 @@
 from typing import Any, Dict, Tuple
 
-from jarowinkler import jarowinkler_similarity
-from Levenshtein import distance as levenshtein_distance
 import numpy as np
 import torch
+from jarowinkler import jarowinkler_similarity
+from Levenshtein import distance as levenshtein_distance
 from torch.nn import functional as F
 
 from s2and.extentions.featurization.base_operation import BaseOperation
@@ -194,6 +194,6 @@ class JaroWinklerNoSurname(BaseOperation):
         surname = val1.split(' ')[-1]
         val1 = val1.replace(' ' + surname, '')
         val2 = val2.replace(' ' + surname, '')
-        if len(val1) == 1 or len(val2) == 1:
-            return np.nan
+        # cases like val1 = "k" and val2 = "k" return 0
+        # cases like val1 = "k" and val2 = "a" return 1
         return jarowinkler_similarity(val1, val2)
