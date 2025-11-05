@@ -1,10 +1,11 @@
 import argparse
 
 import mlflow
+from mlflow.tracking.request_header.registry import _request_header_provider_registry
 
 from s2and.extentions.pipeline import ANDPipeline
 from s2and.utils.configs import load_configurations
-from s2and.utils.mlflow import get_or_create_experiment
+from s2and.utils.mlflow import CustomHeaderProvider, get_or_create_experiment
 
 if __name__ == "__main__":
 
@@ -30,6 +31,7 @@ if __name__ == "__main__":
 
     cfg = load_configurations(path=args.config_file)
     mlflow.set_tracking_uri(cfg.mlflow.tracking_uri)
+    _request_header_provider_registry.register(CustomHeaderProvider)
     experiment_id = get_or_create_experiment(name=cfg.mlflow.experiment_name)
     and_pipeline = ANDPipeline(
         features=cfg.features,

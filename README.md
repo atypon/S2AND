@@ -1,9 +1,11 @@
 # S2AND
+
 This repository provides access to the S2AND dataset and S2AND reference model described in the paper [S2AND: A Benchmark and Evaluation System for Author Name Disambiguation](https://api.semanticscholar.org/CorpusID:232233421) by Shivashankar Subramanian, Daniel King, Doug Downey, Sergey Feldman.
 
 The reference model is live on semanticscholar.org, and the trained model is available now as part of the data download (see below).
 
 ## Installation
+
 To install this package, run the following:
 
 ```bash
@@ -15,12 +17,14 @@ pip install -e .
 ```
 
 If you run into cryptic errors about GCC on macOS while installing the requirments, try this instead:
+
 ```bash
 CFLAGS='-stdlib=libc++' pip install -r requirements.in
 ```
 
-## Data 
-To obtain the S2AND dataset, run the following command after the package is installed (from inside the `S2AND` directory):  
+## Data
+
+To obtain the S2AND dataset, run the following command after the package is installed (from inside the `S2AND` directory):
 
 `aws s3 sync --no-sign-request s3://ai2-s2-research-public/s2and-release data/`
 
@@ -33,13 +37,16 @@ For the data extended with PKG's info space, run the following command :
 `gsutil -m cp -r gs://pkg-datasets-regional-3da58327/datasets/S2AND/extended_data/ extended_data/`
 
 ## Configuration
+
 Modify the config file at `data/path_config.json`. This file should look like this
-```
+
+```json
 {
     "main_data_dir": "absolute path to wherever you downloaded the data to",
     "internal_data_dir": "ignore this one unless you work at AI2"
 }
 ```
+
 As the dummy file says, `main_data_dir` should be set to the location of wherever you downloaded the data to, and
 `internal_data_dir` can be ignored, as it is used for some scripts that rely on unreleased data, internal to Semantic Scholar.
 
@@ -47,5 +54,12 @@ As the dummy file says, `main_data_dir` should be set to the location of whereve
 
 There are three main run scripts to perform the disambiguation process.
 
-  * run_inference.py: Produces embeddings with the selected transformer model defined by an onnx file for all signatures in the data.
-  * run_and.py: Runs complete AND procedure by training a pairwise classifier and optimizing a clustering algorithm.
+* run_inference.py: Produces embeddings with the selected transformer model defined by an onnx file for all signatures in the data.
+* run_and.py: Runs complete AND procedure by training a pairwise classifier and optimizing a clustering algorithm.
+
+Be sure to export Cloudflare headers to be able to connect with MLflow using:
+
+```bash
+export CF_Access_Client_Id=xxx
+export CF_Access_Client_Secret=xxx
+```
