@@ -1,15 +1,17 @@
 import json
-import torch
-import numpy as np
 from collections import defaultdict
 from os.path import join
-from typing import Tuple, Any, Union, List, Dict
-from tqdm import tqdm
+from typing import Any, Dict, List, Tuple, Union
+
+import numpy as np
+import torch
 from joblib import load
-from s2and.data import ANDData
 from sklearn.cluster import DBSCAN, AgglomerativeClustering
-from s2and.extentions.utils import load_signatures
+from tqdm import tqdm
+
+from s2and.data import ANDData
 from s2and.extentions.featurization.operations import Registry
+from s2and.extentions.utils import load_signatures
 
 
 class Clusterer():
@@ -45,7 +47,7 @@ class Clusterer():
         elif clusterer == 'agglomerative':
             self.clusterer = AgglomerativeClustering(
                 n_clusters=None,
-                affinity='precomputed',
+                metric='precomputed',
                 distance_threshold=0.4,
                 linkage='average'
             )

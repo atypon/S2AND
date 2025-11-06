@@ -11,7 +11,7 @@ To install this package, run the following:
 ```bash
 git clone https://github.com/atypon/S2AND.git
 cd S2AND
-conda create -y --name s2and python==3.7
+conda create -y --name s2and python==3.11
 conda activate s2and
 pip install -e .
 ```

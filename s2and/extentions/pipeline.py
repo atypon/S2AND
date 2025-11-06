@@ -1,12 +1,12 @@
 from os.path import join
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
-from hyperopt import fmin, tpe
 import joblib
 import lightgbm as lgb
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+from hyperopt import fmin, tpe
 from sklearn.metrics import classification_report, f1_score
 
 from s2and import logger
@@ -16,8 +16,8 @@ from s2and.extentions.clustering_models import Clusterer
 from s2and.extentions.clustering_objective import Objective
 from s2and.extentions.featurization.utils import get_matrices
 from s2and.extentions.utils import load_dataset
-from s2and.utils.testing import create_test_file
 from s2and.utils.onnx_converter import ONNXConverter
+from s2and.utils.testing import create_test_file
 
 
 class ANDPipeline():
@@ -97,6 +97,8 @@ class ANDPipeline():
             y=y_train,
             categorical_feature=self.categorical_features
         )
+        # Turn off lightgbm autologging
+        mlflow.lightgbm.autolog(disable=True)
 
         # Save results and reports
         mlflow.log_param('classifier-datasets', datasets)
