@@ -2,11 +2,11 @@ data_dir: data/
 extended_data_dir: extended_data/
 embeddings_dir: external_embeddings/
 datasets: [pubmed, aminer, zbmath, kisti, arnetminer]
-batch_size: 10
+batch_size: 32
 model:
   type: gemini
   name: gemini-embedding-001
   gcp_project: information-discovery
   gcp_location: us-central1
   task_type: RETRIEVAL_DOCUMENT
-  truncate_dim: 376
+  truncate_dim: 384

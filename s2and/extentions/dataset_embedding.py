@@ -3,7 +3,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 from os.path import join
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from google import genai
@@ -115,22 +115,12 @@ async def embed_s2and(
     """
     embeddings_dir = join(embeddings_dir, model_name)
 
-    def parse_jsonl(path: str) -> List[Dict[str, Any]]:
-        """Parses jsonl file"""
-        with open(path) as f:
-            content = f.read().split("\n")
-        content.remove("")
-        return list(map(json.loads, content))
-
     for dataset_name in dataset_names:
         logger.info(f"Embedding S2AND {dataset_name}...")
         with open(join(data_dir, dataset_name, f"{dataset_name}_papers.json")) as f:
             papers = json.load(f)
         with open(join(data_dir, dataset_name, f"{dataset_name}_signatures.json")) as f:
             signature_to_paper_id = json.load(f)
-        signatures = parse_jsonl(
-            join(extended_data_dir, f"{dataset_name}-signatures.json")
-        )
 
         if not os.path.isdir(embeddings_dir):
             os.mkdir(embeddings_dir)
@@ -139,8 +129,8 @@ async def embed_s2and(
 
         # Collect unique papers to process
         papers_to_process: List[Tuple[str, str, str]] = []
-        for entry in signatures:
-            paper_id = signature_to_paper_id[entry["signature_id"]]["paper_id"]
+        for signature_id in signature_to_paper_id.keys():
+            paper_id = signature_to_paper_id[signature_id]["paper_id"]
             paper_id = str(paper_id)
             if paper_id not in embeddings:
                 title = papers[paper_id]["title"] or ""
