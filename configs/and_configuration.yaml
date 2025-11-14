@@ -5,7 +5,10 @@ features:
     field: paperVector
     categorical: False
   - operation: jarowinkler_no_surname
-    field: authorNormName
+    field: rawAuthorName
+    categorical: False
+  - operation: jarowinkler_no_surname
+    field: oaAuthorName
     categorical: False
   - operation: jaccard_similarity
     field: affiliationIds
@@ -21,9 +24,6 @@ features:
     field: oaAuthorId
     categorical: True
     introduce_nan: 0.15
-  - operation: equality
-    field: orcId
-    categorical: True
   - operation: normalized_by_authors_absolute_difference
     field: authorPositionNo
     operation_args:
@@ -31,6 +31,9 @@ features:
     categorical: False
   - operation: absolute_difference
     field: pubYear
+    categorical: False
+  - operation: jaccard_similarity
+    field: references
     categorical: False
 pairwise_model:
   datasets: [aminer, pubmed, zbmath, kisti, arnetminer]
@@ -58,4 +61,4 @@ results_dir: results/
 mlflow:
   tracking_uri: https://rnd-mlflow.literatumonline.com
   experiment_name: AND-complete-pipeline
-  run_name: offline-disambiguation-revision-2025
+  run_name: offline-disambiguation-2025-both-names-references-gemini
