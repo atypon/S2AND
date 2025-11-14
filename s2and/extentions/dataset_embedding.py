@@ -98,7 +98,6 @@ async def embed_s2and(
     model: EncoderModel,
     model_name: str,
     data_dir: str,
-    extended_data_dir: str,
     embeddings_dir: str,
     dataset_names: List[str] = ["pubmed", "aminer", "zbmath", "kisti", "arnetminer"],
     batch_size: int = 10,
@@ -108,7 +107,6 @@ async def embed_s2and(
     :param model: Model that implements forward method and infers vectors
     :param model_name: Name of the model
     :param data_dir: Directory of s2and dataset
-    :param extended_data_dir: Directory of s2and extended dataset
     :param embeddings_dir: Directory embeddings will be saved
     :param dataset_names: List of dataset names to embed
     :param batch_size: Number of papers to process concurrently in each batch

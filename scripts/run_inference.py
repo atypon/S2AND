@@ -34,7 +34,6 @@ if __name__ == "__main__":
             model=model,
             model_name=cfg.model.name,
             data_dir=cfg.data_dir,
-            extended_data_dir=cfg.extended_data_dir,
             embeddings_dir=cfg.embeddings_dir,
             dataset_names=cfg.datasets,
             batch_size=cfg.batch_size,

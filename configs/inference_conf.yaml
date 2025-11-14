@@ -1,5 +1,4 @@
 data_dir: data/
-extended_data_dir: extended_data/
 embeddings_dir: external_embeddings/
 datasets: [pubmed, aminer, zbmath, kisti, arnetminer]
 batch_size: 32
