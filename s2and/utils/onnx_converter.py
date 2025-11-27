@@ -42,7 +42,7 @@ class ONNXConverter():
         model_onnx = convert_sklearn(
             self.model, 'lightgbm',
             [('input', FloatTensorType([None, len(self.features)]))],
-            target_opset=12)
+            target_opset={'': 12, 'ai.onnx.ml': 3})
         with open(destination_path, "wb") as f:
             f.write(model_onnx.SerializeToString())
 
