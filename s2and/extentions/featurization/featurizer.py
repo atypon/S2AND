@@ -56,13 +56,7 @@ class Featurizer:
                 y.append(pair[2])
                 sig1 = self.extended_signatures[pair[0]]
                 sig2 = self.extended_signatures[pair[1]]
-                if self.paper_ids_to_emb is not None:
-                    sig1["external_vector"] = self.paper_ids_to_emb[
-                        str(sig1["paper_id"])
-                    ]
-                    sig2["external_vector"] = self.paper_ids_to_emb[
-                        str(sig2["paper_id"])
-                    ]
+
                 X.append(self.featurize_pair(signature_pair=(sig1, sig2)))
         return np.asarray(X), np.asarray(y)
 
@@ -91,6 +85,10 @@ class Featurizer:
         :param signature_pair: pair of signatures to be featurized
         :return: feature vector
         """
+        sig1, sig2 = signature_pair
+        if self.paper_ids_to_emb is not None:
+            sig1["external_vector"] = self.paper_ids_to_emb[str(sig1["paper_id"])]
+            sig2["external_vector"] = self.paper_ids_to_emb[str(sig2["paper_id"])]
         feature_vector = []
         for feature in self.features:
             operation_name = feature["operation"]
