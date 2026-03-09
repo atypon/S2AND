@@ -192,9 +192,10 @@ class JaroWinklerNoSurname(BaseOperation):
         self._check_type(values, str)
         val1, val2 = values
         # Surname can be obtained from either val1 or val2
-        surname = val1.split(" ")[-1]
-        val1 = val1.replace(" " + surname, "")
-        val2 = val2.replace(" " + surname, "")
+        surname1 = val1.split(" ")[-1]
+        surname2 = val2.split(" ")[-1]
+        val1 = val1.replace(" " + surname1, "")
+        val2 = val2.replace(" " + surname2, "")
         # cases like val1 = "k" and val2 = "k" return 0
         # cases like val1 = "k" and val2 = "a" return 1
         return jarowinkler_similarity(val1, val2)
